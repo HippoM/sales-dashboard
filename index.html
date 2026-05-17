@@ -1,0 +1,3466 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Dashboard V2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg:          #fafaf8;
+    --bg2:         #f3f0ea;
+    --bg3:         #ffffff;
+    --border:      #e8e4dc;
+    --border2:     #d4cfc6;
+    --text:        #2c2c2a;
+    --text2:       #5F5E5A;
+    --text3:       #888780;
+    --green:       #3B6D11;
+    --green2:      #639922;
+    --green3:      #c0dd97;
+    --green-bg:    #eaf3de;
+    --green-light: #f4faec;
+    --red:         #A32D2D;
+    --red-bg:      #fcebeb;
+    --red-border:  #f7c1c1;
+    --amber:       #854F0B;
+    --amber-bg:    #faeeda;
+    --amber-border:#FAC775;
+    --radius:      10px;
+    --radius-sm:   6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ===================== TOPBAR ===================== */
+  .topbar {
+    background: var(--bg3);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 54px;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 20px; }
+  .logo {
+    font-family: 'Nunito', sans-serif;
+    font-size: 17px;
+    color: var(--text);
+    letter-spacing: 0.01em;
+    font-weight: 700;
+  }
+  .logo span { color: var(--green); }
+
+  .nav-tabs { display: flex; gap: 0; }
+  .nav-tab {
+    font-size: 13px;
+    padding: 0 16px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid transparent;
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--green); border-bottom-color: var(--green); font-weight: 500; }
+  .nav-tab.admin-tab { color: var(--amber); }
+  .nav-tab.admin-tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .conn-dot { width: 6px; height: 6px; border-radius: 50%; background: #ccc; transition: background 0.3s; }
+  .conn-dot.ok { background: var(--green); }
+  .conn-text { font-size: 12px; color: var(--text3); }
+
+  /* ===================== FILTER BAR ===================== */
+  .filter-bar {
+    background: var(--bg3);
+    border-bottom: 0.5px solid var(--border);
+    padding: 8px 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 54px;
+    z-index: 100;
+    transition: border-bottom-color 0.2s;
+  }
+  .filter-bar.plat-t2c    { border-bottom-color: var(--green); }
+  .filter-bar.plat-k2c    { border-bottom-color: #185FA5; }
+  .filter-bar.plat-tiktok { border-bottom-color: #7a2844; }
+  .filter-divider { width: 0.5px; height: 20px; background: var(--border); }
+
+  .seg {
+    display: flex;
+    gap: 2px;
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 2px;
+  }
+  .seg-btn {
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.12s;
+    font-family: 'Nunito', sans-serif;
+  }
+  .seg-btn.active { background: var(--bg3); color: var(--text); font-weight: 500; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+  .filter-select {
+    font-size: 13px;
+    padding: 5px 10px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    background: var(--bg3);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    outline: none;
+    cursor: pointer;
+  }
+  .filter-select:focus { border-color: var(--green); }
+
+  .plat-filters { display: flex; gap: 4px; }
+  .plat-btn {
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border);
+    background: transparent;
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.12s;
+    font-family: 'Nunito', sans-serif;
+  }
+  /* Mau san — pastel co dinh */
+  .plat-btn.plat-all    { background: #f0ede6; color: #2c2c2a; border-color: #d4cfc6; }
+  .plat-btn.plat-all.is-active { background: #e0dcd4; color: #2c2c2a; border-color: #2c2c2a; font-weight:600; }
+
+  /* T2C — xanh la */
+  .plat-btn.plat-t2c    { background: #c8eba8; color: #2d5509; border-color: #96d45a; transition: all 0.15s; }
+  .plat-btn.plat-t2c.is-active { background: #a8d878; border-color: #2d5509; font-weight:600; box-shadow: 0 0 0 2px #3B6D1130; }
+
+  /* K2C — xanh duong */
+  .plat-btn.plat-k2c    { background: #a8d0f8; color: #1a4a7a; border-color: #70b0e8; transition: all 0.15s; }
+  .plat-btn.plat-k2c.is-active { background: #7ab8f0; border-color: #1a4a7a; font-weight:600; box-shadow: 0 0 0 2px #1a4a7a30; }
+
+  /* TikTok — tim */
+  .plat-btn.plat-tiktok { background: #d4bcf8; color: #4a1a8a; border-color: #a07ae4; transition: all 0.15s; }
+  .plat-btn.plat-tiktok.is-active { background: #b89cf0; border-color: #4a1a8a; font-weight:600; box-shadow: 0 0 0 2px #4a1a8a30; }
+
+  /* ===================== CONTENT ===================== */
+  .content { max-width: 100%; margin: 0; padding: 24px 32px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ===================== KPI GRID ===================== */
+  .kpi-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .kpi-card {
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    transition: box-shadow 0.15s;
+  }
+  .kpi-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .kpi-label { font-size: 11px; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 6px; }
+  .kpi-value { font-family: 'Nunito', sans-serif; font-size: 24px; color: var(--text); margin-bottom: 3px; }
+  .kpi-delta { font-size: 12px; }
+  .delta-up { color: var(--green); }
+  .delta-dn { color: var(--red); }
+  .delta-neu { color: var(--text3); }
+
+  /* ===================== CHARTS ROW ===================== */
+  .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .chart-card {
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .chart-title { font-size: 12px; color: var(--text3); letter-spacing: 0.03em; text-transform: uppercase; margin-bottom: 12px; font-weight: 600; }
+  .chart-area { width: 100%; height: 140px; position: relative; }
+
+  /* ===================== TABLE CARD ===================== */
+  .table-card {
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .table-header {
+    padding: 12px 16px;
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg);
+  }
+  .table-title { font-size: 12px; color: var(--text3); letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left;
+    font-size: 12px;
+    color: var(--text2);
+    letter-spacing: 0.02em;
+    padding: 10px 14px;
+    border-bottom: 0.5px solid var(--border);
+    font-weight: 600;
+    background: var(--bg);
+    white-space: nowrap;
+  }
+  th.right, td.right { text-align: right; }
+  td {
+    padding: 10px 14px;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 13px;
+    color: var(--text);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg); }
+
+  .gm-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .gm-high { background: var(--green-bg); color: var(--green); }
+  .gm-mid  { background: var(--amber-bg); color: var(--amber); }
+  .gm-low  { background: var(--red-bg); color: var(--red); }
+
+  /* ===================== SECTION TABS ===================== */
+  .section-tabs { display: flex; gap: 4px; margin-bottom: 14px; }
+  .section-tab {
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border2);
+    background: transparent;
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.12s;
+    font-family: 'Nunito', sans-serif;
+  }
+  .section-tab.active { background: var(--green-bg); color: var(--green); border-color: var(--green3); font-weight: 500; }
+
+  /* ===================== SEARCH INPUT ===================== */
+  .search-wrap { position: relative; display: flex; align-items: center; gap: 6px; }
+  .search-wrap input {
+    font-size: 13px;
+    padding: 7px 10px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    outline: none;
+    width: 220px;
+    transition: border-color 0.12s, width 0.2s;
+  }
+  .search-wrap input:focus { border-color: var(--green); width: 280px; }
+  .search-wrap-icon { color: var(--text3); font-size: 15px; flex-shrink: 0; }
+
+  /* ===================== BUTTONS ===================== */
+  .btn {
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border2);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    transition: all 0.12s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--bg2); }
+  .btn-primary { background: var(--green); color: white; border-color: var(--green); }
+  .btn-primary:hover { background: #2d5509; }
+  .btn-danger { color: var(--red); border-color: var(--red-border); }
+  .btn-danger:hover { background: var(--red-bg); }
+  .btn-sm { font-size: 11px; padding: 4px 10px; }
+  .btn-edit { color: var(--green); border-color: var(--green3); }
+  .btn-edit:hover { background: var(--green-bg); }
+
+  /* ===================== FORM ===================== */
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  label { font-size: 10px; color: var(--text3); letter-spacing: 0.03em; }
+  input[type=text], input[type=number], input[type=date], input[type=month], select, textarea {
+    font-size: 12px;
+    padding: 7px 10px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    outline: none;
+    transition: border-color 0.12s;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--green); }
+
+  /* ===================== CARD ===================== */
+  .card {
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .card-header {
+    padding: 12px 16px;
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg);
+  }
+  .card-title { font-size: 12px; font-weight: 500; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .card-body { padding: 16px; }
+
+  /* ===================== COST SEARCH ===================== */
+  .sku-search-result {
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg3);
+    margin-top: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+  }
+  .sku-search-result.show { display: block; }
+  .sku-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 0.5px solid var(--border);
+    transition: background 0.1s;
+  }
+  .sku-option:last-child { border-bottom: none; }
+  .sku-option:hover { background: var(--green-light); }
+  .sku-option-name { font-size: 12px; color: var(--text); }
+  .sku-option-cat { font-size: 10px; color: var(--text3); }
+
+  /* ===================== UPLOAD ZONE ===================== */
+  .upload-zone {
+    border: 1.5px dashed var(--border2);
+    border-radius: var(--radius);
+    padding: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--bg);
+  }
+  .upload-zone:hover, .upload-zone.drag { border-color: var(--green); background: var(--green-light); }
+  .upload-zone-icon { font-size: 28px; margin-bottom: 8px; }
+  .upload-zone-text { font-size: 12px; color: var(--text3); }
+  .upload-zone-text strong { color: var(--green); }
+
+  /* ===================== BADGE ===================== */
+  .plat-tag { font-size: 10px; padding: 2px 7px; border-radius: 20px; white-space: nowrap; display: inline-block; }
+  .tag-t2c    { background: var(--green-bg); color: var(--green); }
+  .tag-k2c    { background: #e6f1fb; color: #185FA5; }
+  .tag-tiktok { background: #ede8fb; color: #4a1a8a; }
+  .tag-new { background: var(--bg2); color: var(--text2); border: 0.5px solid var(--border2); }
+  .tag-unmatched { background: var(--amber-bg); color: var(--amber); }
+  .tag-matched { background: var(--green-bg); color: var(--green); }
+
+  /* ===================== ADMIN CONFIG ===================== */
+  .config-table { width: 100%; border-collapse: collapse; }
+  .config-table th { text-align: left; font-size: 10px; color: var(--text3); letter-spacing: 0.04em; padding: 8px 14px; border-bottom: 0.5px solid var(--border); font-weight: 500; background: var(--bg); }
+  .config-table th:first-child { width: 200px; }
+  .config-table td { padding: 6px 14px; border-bottom: 0.5px solid var(--border); vertical-align: middle; }
+  .config-table tr:last-child td { border-bottom: none; }
+  .col-name { font-size: 12px; font-weight: 500; color: var(--text); font-family: 'DM Mono', monospace; }
+  .col-desc { font-size: 10px; color: var(--text3); margin-top: 1px; }
+  .card.readonly input[type=text] { background: transparent; border-color: transparent; pointer-events: none; }
+  .card.readonly .col-desc { display: none; }
+
+  /* ===================== LOCK TABLE ===================== */
+  .status-badge { font-size: 10px; padding: 3px 9px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; }
+  .status-locked { background: var(--green-bg); color: var(--green); border: 0.5px solid var(--green3); }
+  .status-open { background: var(--amber-bg); color: var(--amber); border: 0.5px solid var(--amber-border); }
+
+  /* ===================== LOADING / EMPTY ===================== */
+  .loading { text-align: center; padding: 40px; color: var(--text3); font-size: 12px; }
+  .empty { text-align: center; padding: 40px; color: var(--text3); font-size: 12px; }
+
+  /* ===================== TOAST ===================== */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    padding: 10px 16px; border-radius: 8px;
+    font-size: 12px; z-index: 999;
+    opacity: 0; transition: opacity 0.2s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+  .toast.success { background: var(--green-bg); color: var(--green); border: 0.5px solid var(--green3); }
+  .toast.error { background: var(--red-bg); color: var(--red); border: 0.5px solid var(--red-border); }
+
+  /* ===================== SPINNER ===================== */
+  .loading-spinner {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--green);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ===================== SORTABLE TABLES ===================== */
+  th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
+  th.sortable:hover { color: var(--text); }
+  th.sortable::after { content: ' ⇅'; color: var(--border2); font-size: 10px; }
+  th.sort-asc::after  { content: ' ↑'; color: var(--green); font-size: 11px; }
+  th.sort-desc::after { content: ' ↓'; color: var(--green); font-size: 11px; }
+
+  /* ===================== HEATMAP ===================== */
+  .heatmap-table { border-collapse: collapse; font-size: 11px; min-width: 100%; }
+  .heatmap-table th {
+    font-size: 10px; color: var(--text3); font-weight: 500;
+    padding: 4px 6px; white-space: nowrap; background: var(--bg);
+    border-bottom: 0.5px solid var(--border); text-align: center;
+  }
+  .heatmap-table th.sku-col { text-align: left; min-width: 110px; position: sticky; left: 0; z-index: 2; }
+  .heatmap-table td.sku-label {
+    font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text);
+    padding: 3px 8px 3px 0; white-space: nowrap;
+    position: sticky; left: 0; background: var(--bg3); z-index: 1;
+    border-right: 0.5px solid var(--border);
+  }
+  .heatmap-cell {
+    width: 44px; min-width: 44px; height: 28px;
+    text-align: center; vertical-align: middle;
+    font-size: 10px; font-weight: 500;
+    border: 0.5px solid var(--bg); border-radius: 3px;
+    cursor: default; transition: opacity 0.1s;
+    padding: 0 2px;
+  }
+  .heatmap-cell:hover { opacity: 0.8; outline: 1.5px solid var(--text2); }
+  .heatmap-total {
+    font-size: 11px; font-weight: 600; color: var(--text);
+    padding: 3px 8px; text-align: right; border-left: 0.5px solid var(--border);
+  }
+
+  /* ===================== OVERVIEW SUB-TABS ===================== */
+  .ovr-chart-tabs, .ovr-table-tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 2px;
+  }
+  .ovr-chart-tab, .ovr-table-tab {
+    font-size: 12px;
+    padding: 5px 13px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.12s;
+    font-family: 'Nunito', sans-serif;
+    white-space: nowrap;
+  }
+  .ovr-chart-tab:hover, .ovr-table-tab:hover { color: var(--text); }
+  .ovr-chart-tab.active, .ovr-table-tab.active {
+    background: var(--bg3);
+    color: var(--text);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  /* ===================== APPLY BUTTON ===================== */
+  .apply-btn {
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border2);
+    background: var(--bg2);
+    color: var(--text2);
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    transition: all 0.12s;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .apply-btn:hover { background: var(--green-bg); color: var(--green); border-color: var(--green3); }
+  .apply-btn.apply-pending {
+    background: var(--amber-bg);
+    color: var(--amber);
+    border-color: var(--amber-border);
+    animation: pulse-pending 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse-pending {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.65; }
+  }
+
+  /* ===================== MISC ===================== */
+  .flex { display: flex; }
+  .gap-8 { gap: 8px; }
+  .gap-6 { gap: 6px; }
+  .ml-auto { margin-left: auto; }
+  .mt-14 { margin-top: 14px; }
+  .mono { font-family: 'DM Mono', monospace; }
+  .section-label { font-size: 10px; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 12px; }
+
+  /* ===================== COST HISTORY ===================== */
+  .cost-timeline { display: flex; flex-direction: column; gap: 0; }
+  .cost-entry {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 14px; border-bottom: 0.5px solid var(--border);
+    font-size: 12px;
+  }
+  .cost-entry:last-child { border-bottom: none; }
+  .cost-date { color: var(--text3); font-family: 'DM Mono', monospace; font-size: 11px; min-width: 90px; }
+  .cost-val { font-weight: 500; color: var(--text); }
+  .cost-note { color: var(--text3); font-size: 11px; }
+
+  /* ===================== SVG CHARTS ===================== */
+  .bar-group { display: flex; align-items: flex-end; gap: 4px; height: 100px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bar-rect { width: 100%; border-radius: 2px 2px 0 0; transition: opacity 0.15s; }
+  .bar-rect:hover { opacity: 0.8; }
+  .bar-label { font-size: 9px; color: var(--text3); }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">Sales <span>Dashboard</span></div>
+    <nav class="nav-tabs" id="nav-tabs">
+      <div class="nav-tab active" onclick="switchTab('overview')">Tổng quan</div>
+      <div class="nav-tab" onclick="switchTab('sales')">Số lượng bán</div>
+      <div class="nav-tab" onclick="switchTab('cost')">Quản lý giá vốn</div>
+      <div class="nav-tab" onclick="switchTab('mapping')">SKU Mapping</div>
+      <!-- Admin tab: hidden by default, shown via ?key= -->
+      <div class="nav-tab admin-tab" id="admin-nav" onclick="switchTab('admin')" style="display:none;">Admin</div>
+    </nav>
+  </div>
+  <div class="topbar-right">
+    <div class="conn-dot" id="conn-dot"></div>
+    <span class="conn-text" id="conn-text">Đang kết nối...</span>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar" id="filter-bar">
+  <!-- Granularity -->
+  <div class="seg" id="gran-seg">
+    <button class="seg-btn" onclick="setGran('year')">Năm</button>
+    <button class="seg-btn active" onclick="setGran('month')">Tháng</button>
+    <button class="seg-btn" onclick="setGran('day')">Ngày</button>
+  </div>
+
+  <!-- Time controls -->
+  <div id="time-controls"></div>
+
+  <div class="filter-divider"></div>
+
+  <!-- Unit toggle -->
+  <select class="filter-select" id="unit-select" onchange="setUnit(this.value)" style="width:90px;">
+    <option value="vnd">VND</option>
+    <option value="kvnd">kVND</option>
+    <option value="mvnd">mVND</option>
+  </select>
+
+  <div class="filter-divider"></div>
+
+  <!-- Platform -->
+  <div class="plat-filters">
+    <button class="plat-btn plat-all is-active" id="plat-all"    onclick="setPlatform('all')">Tất cả</button>
+    <button class="plat-btn plat-t2c"           id="plat-t2c"    onclick="setPlatform('t2c')">Shopee T2C</button>
+    <button class="plat-btn plat-k2c"           id="plat-k2c"    onclick="setPlatform('k2c')">Shopee K2C</button>
+    <button class="plat-btn plat-tiktok"        id="plat-tiktok" onclick="setPlatform('tiktok')">TikTok Shop</button>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="content">
+
+  <!-- ===== TAB: TỔNG QUAN ===== -->
+  <div class="tab-panel active" id="panel-overview">
+
+    <!-- KPI GRID -->
+    <div class="kpi-grid" id="kpi-grid">
+      <div class="kpi-card"><div class="kpi-label">Doanh thu</div><div class="kpi-value" id="kpi-revenue">—</div><div class="kpi-delta" id="kpi-revenue-d">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">Gross Margin</div><div class="kpi-value" id="kpi-gm">—</div><div class="kpi-delta" id="kpi-gm-d">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">Lợi nhuận gộp</div><div class="kpi-value" id="kpi-profit">—</div><div class="kpi-delta" id="kpi-profit-d">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">Số đơn</div><div class="kpi-value" id="kpi-orders">—</div><div class="kpi-delta" id="kpi-orders-d">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">AOV (DT/đơn)</div><div class="kpi-value" id="kpi-aov">—</div><div class="kpi-delta" id="kpi-aov-d">—</div></div>
+    </div>
+
+    <!-- SUB-TAB BAR -->
+    <div style="display:flex;align-items:center;gap:0;margin-bottom:16px;">
+      <div class="ovr-chart-tabs">
+        <button class="ovr-chart-tab active" onclick="setChartView('summary')">Overview</button>
+        <button class="ovr-chart-tab" onclick="setChartView('sku')">Theo SKU</button>
+        <button class="ovr-chart-tab" onclick="setChartView('category')">Theo Category</button>
+      </div>
+    </div>
+
+    <!-- ====== SUBTAB: OVERVIEW ====== -->
+    <div id="cv-summary">
+      <div class="chart-card" style="margin-bottom:12px;">
+        <div class="chart-title" style="margin-bottom:8px;">Gross Margin (%) theo thời gian</div>
+        <div style="position:relative;width:100%;height:200px;"><canvas id="chart-gm"></canvas></div>
+      </div>
+      <div class="chart-card" style="margin-bottom:16px;">
+        <div class="chart-title" style="margin-bottom:8px;display:flex;align-items:center;gap:12px;">
+          Doanh thu &amp; Giá vốn theo thời gian
+          <span style="font-size:10px;color:var(--text3);display:flex;gap:10px;">
+            <span><span style="display:inline-block;width:10px;height:10px;background:#a8d878;border-radius:2px;margin-right:3px;"></span>Doanh thu</span>
+            <span><span style="display:inline-block;width:10px;height:10px;background:#c8c8c8;border-radius:2px;margin-right:3px;"></span>Giá vốn</span>
+          </span>
+        </div>
+        <div style="position:relative;width:100%;height:200px;"><canvas id="chart-revcogs"></canvas></div>
+      </div>
+      <!-- Table: Time detail -->
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">Chi tiết theo thời gian</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button class="btn btn-sm" onclick="exportTableCSV()">↓ CSV</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table id="tbl-time">
+            <thead><tr>
+              <th class="sortable">Thời gian</th>
+              <th class="sortable">Sàn</th>
+              <th class="right sortable">Doanh thu</th>
+              <th class="right sortable">Giá vốn</th>
+              <th class="right sortable">Lợi nhuận gộp</th>
+              <th class="right sortable">Gross Margin</th>
+              <th class="right sortable">Số Đơn</th>
+              <th class="right sortable">AOV</th>
+            </tr></thead>
+            <tbody id="time-table-body"><tr><td colspan="8" class="loading">Đang tải...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== SUBTAB: THEO SKU ====== -->
+    <div id="cv-sku" style="display:none;">
+      <div class="chart-card" style="margin-bottom:16px;">
+        <div class="chart-title" style="margin-bottom:8px;">Top 20 SKU — Doanh thu &amp; Giá vốn</div>
+        <div style="position:relative;width:100%;height:520px;"><canvas id="chart-sku-bar"></canvas></div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">Chi tiết theo SKU</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button class="btn btn-sm" onclick="exportTableCSV()">↓ CSV</button>
+            <div class="search-wrap"><span class="search-wrap-icon">⌕</span><input type="text" id="sku-search-input" placeholder="Tìm SKU..." oninput="filterSkuTable(this.value)"></div>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table id="tbl-sku">
+            <thead><tr>
+              <th class="sortable">#</th><th class="sortable">SKU</th><th>Tên sản phẩm</th><th>Category</th><th>Sàn</th>
+              <th class="right sortable">SL bán</th><th class="right sortable">Doanh thu</th>
+              <th class="right sortable">Giá vốn</th><th class="right sortable">Lợi nhuận</th><th class="right sortable">GM%</th><th class="right sortable">AOV</th>
+            </tr></thead>
+            <tbody id="sku-table-body"><tr><td colspan="11" class="loading">Đang tải...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== SUBTAB: THEO CATEGORY ====== -->
+    <div id="cv-category" style="display:none;">
+      <div class="chart-card" style="margin-bottom:16px;">
+        <div class="chart-title" style="margin-bottom:8px;">Medium Category — Doanh thu &amp; Giá vốn</div>
+        <div style="position:relative;width:100%;height:420px;"><canvas id="chart-cat-bar"></canvas></div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">Chi tiết theo Category</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button class="btn btn-sm" onclick="exportTableCSV()">↓ CSV</button>
+            <div class="search-wrap"><span class="search-wrap-icon">⌕</span><input type="text" id="cat-search-input" placeholder="Tìm category..." oninput="filterCatTable(this.value)"></div>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table id="tbl-cat-ovr">
+            <thead><tr>
+              <th class="sortable">#</th><th class="sortable">Category</th><th>Sàn</th>
+              <th class="right sortable">SL bán</th><th class="right sortable">Doanh thu</th>
+              <th class="right sortable">Giá vốn</th><th class="right sortable">Lợi nhuận</th><th class="right sortable">GM%</th><th class="right sortable">AOV</th>
+            </tr></thead>
+            <tbody id="cat-overview-body"><tr><td colspan="9" class="loading">Đang tải...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== TAB: SỐ LƯỢNG BÁN ===== -->
+  <div class="tab-panel" id="panel-sales">
+    <div class="section-tabs">
+      <button class="section-tab active" onclick="setSalesView('sku')">Theo SKU</button>
+      <button class="section-tab" onclick="setSalesView('category')">Theo Category</button>
+      <button class="section-tab" onclick="setSalesView('platform')">Theo Sàn</button>
+    </div>
+
+    <!-- Theo SKU -->
+    <div id="sales-sku">
+      <!-- Heatmap -->
+      <div class="chart-card" style="margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div class="chart-title" style="margin-bottom:0;">Heatmap SL bán — Top SKU theo thời gian</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:11px;color:var(--text3);">Top</span>
+            <select class="filter-select" id="heatmap-top-n" onchange="renderHeatmap()" style="width:70px;">
+              <option value="10">10</option>
+              <option value="20" selected>20</option>
+              <option value="30">30</option>
+            </select>
+            <span style="font-size:11px;color:var(--text3);">SKU</span>
+          </div>
+        </div>
+        <div id="heatmap-wrap" style="overflow-x:auto;"></div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:10px;color:var(--text3);">
+          <span>Ít</span>
+          <div id="heatmap-legend" style="display:flex;gap:2px;"></div>
+          <span>Nhiều</span>
+        </div>
+      </div>
+
+      <!-- Bảng tổng hợp -->
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">Tổng hợp SL bán theo SKU</div>
+          <div class="search-wrap"><span class="search-wrap-icon">⌕</span><input type="text" placeholder="Tìm SKU..." oninput="filterSalesSkuTable(this.value)"></div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table id="tbl-sales-sku">
+            <thead><tr>
+              <th style="width:36px;" class="sortable">#</th>
+              <th style="width:110px;" class="sortable">SKU</th>
+              <th>Tên sản phẩm</th>
+              <th style="width:160px;">Category</th>
+              <th class="right sortable" style="width:90px;">SL bán</th>
+              <th class="right sortable" style="width:130px;">Doanh thu</th>
+              <th class="right sortable" style="width:70px;">GM%</th>
+            </tr></thead>
+            <tbody id="sales-sku-body"><tr><td colspan="7" class="loading">Đang tải...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Theo Category -->
+    <div id="sales-category" style="display:none;">
+      <div style="margin-bottom:12px;">
+        <select class="filter-select" id="medium-cat-filter" onchange="loadCategoryData()" style="width:260px;">
+          <option value="">Tất cả Medium Category</option>
+        </select>
+      </div>
+
+      <!-- Chart SL bán theo category -->
+      <div class="chart-card" style="margin-bottom:12px;">
+        <div class="chart-title" style="margin-bottom:8px;">SL bán theo Medium Category</div>
+        <div style="position:relative;width:100%;height:360px;"><canvas id="chart-cat-qty"></canvas></div>
+      </div>
+
+      <!-- Bảng -->
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">Chi tiết theo Category</div></div>
+        <table id="tbl-cat-sales">
+          <thead><tr>
+            <th class="sortable">#</th><th class="sortable">Medium Category</th><th>Large Category</th>
+            <th class="right sortable" style="width:90px;">SL bán</th>
+            <th class="right sortable" style="width:130px;">Doanh thu</th>
+            <th class="right sortable" style="width:70px;">GM%</th>
+            <th class="right sortable" style="width:100px;">Tháng đỉnh</th>
+          </tr></thead>
+          <tbody id="cat-table-body"><tr><td colspan="7" class="loading">Đang tải...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Theo Sàn -->
+    <div id="sales-platform" style="display:none;">
+      <div class="charts-row" style="grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px;">
+        <div class="chart-card">
+          <div class="chart-title">SL bán theo sàn</div>
+          <div style="position:relative;width:100%;height:200px;"><canvas id="chart-plat-trend"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Tỷ trọng SL bán theo sàn</div>
+          <div style="position:relative;width:100%;height:200px;"><canvas id="chart-plat-share"></canvas></div>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">Chi tiết theo sàn</div></div>
+        <table>
+          <thead><tr>
+            <th>Sàn</th><th class="right">SL bán</th>
+            <th class="right">Doanh thu</th><th class="right">GM%</th><th class="right">Số đơn</th>
+          </tr></thead>
+          <tbody id="plat-table-body"><tr><td colspan="5" class="loading">Đang tải...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB: GIÁ VỐN ===== -->
+  <div class="tab-panel" id="panel-cost">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div class="ovr-chart-tabs">
+        <button class="ovr-chart-tab active" onclick="setCostView('update')">Cập nhật giá vốn</button>
+        <button class="ovr-chart-tab" onclick="setCostView('trend')">Theo SKU</button>
+        <button class="ovr-chart-tab" onclick="setCostView('category')">Theo Category</button>
+      </div>
+      <div id="cost-counter" style="display:flex;gap:10px;align-items:center;font-size:12px;">
+        <span id="cost-counter-has" style="color:var(--green);font-weight:600;">—</span>
+        <span style="color:var(--border2);">|</span>
+        <span id="cost-counter-missing" style="color:var(--amber);font-weight:600;">—</span>
+      </div>
+    </div>
+
+    <!-- VIEW: CẬP NHẬT -->
+    <div id="cost-view-update">
+      <div style="position:sticky;top:0;z-index:10;background:var(--bg3);padding-bottom:12px;border-bottom:0.5px solid var(--border);margin-bottom:16px;">
+        <div class="flex gap-8" style="margin-bottom:12px;">
+          <button class="btn" id="cost-mode-manual" onclick="setCostMode('manual')" style="background:var(--green-bg);color:var(--green);border-color:var(--green3);">✏ Nhập tay</button>
+          <button class="btn" id="cost-mode-upload" onclick="setCostMode('upload')">↑ Upload Excel</button>
+        </div>
+        <div id="cost-manual">
+          <div class="card"><div class="card-body">
+            <div class="flex gap-8" style="flex-wrap:wrap;align-items:flex-end;">
+              <div class="form-group" style="flex:1;min-width:200px;position:relative;">
+                <label>Tìm SKU</label>
+                <input type="text" id="cost-sku-search" placeholder="VD: CAP(FL) hoặc tên SP..." oninput="searchSku(this.value)" autocomplete="off">
+                <div class="sku-search-result" id="sku-dropdown"></div>
+              </div>
+              <div class="form-group" style="width:130px;"><label>Ngày hiệu lực</label><input type="date" id="cost-date"></div>
+              <div class="form-group" style="width:130px;"><label>Giá vốn / đơn vị</label><input type="number" id="cost-value" placeholder="VD: 45000"></div>
+              <div class="form-group" style="flex:1;min-width:150px;"><label>Ghi chú</label><input type="text" id="cost-note" placeholder="VD: Nhập lô tháng 5"></div>
+              <button class="btn btn-primary" onclick="saveCost()">Lưu giá vốn</button>
+            </div>
+            <div id="cost-sku-info" style="display:none;margin-top:14px;padding:10px 12px;background:var(--green-light);border-radius:var(--radius-sm);border:0.5px solid var(--green3);">
+              <div style="font-size:12px;font-weight:500;" id="cost-sku-name">—</div>
+              <div style="font-size:11px;color:var(--text3);" id="cost-sku-cat">—</div>
+              <div style="font-size:11px;color:var(--text2);margin-top:4px;" id="cost-sku-current">Giá hiện tại: —</div>
+            </div>
+          </div></div>
+        </div>
+        <div id="cost-upload" style="display:none;">
+          <div class="card"><div class="card-body">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:12px;">Format: <span class="mono">sku</span> | <span class="mono">cogs</span> | <span class="mono">effective_date (YYYY-MM-DD)</span> | <span class="mono">note (optional)</span></div>
+            <div class="upload-zone" id="upload-zone" onclick="document.getElementById('cost-file').click()" ondragover="handleDrag(event,true)" ondragleave="handleDrag(event,false)" ondrop="handleDrop(event)">
+              <div class="upload-zone-icon">📄</div>
+              <div class="upload-zone-text"><strong>Click để chọn file</strong> hoặc kéo thả vào đây</div>
+              <div class="upload-zone-text" style="margin-top:4px;">Hỗ trợ .xlsx và .csv</div>
+            </div>
+            <input type="file" id="cost-file" accept=".xlsx,.csv" style="display:none;" onchange="handleCostFile(this)">
+            <div id="cost-preview" style="display:none;margin-top:14px;">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:8px;" id="cost-preview-info"></div>
+              <div style="overflow-x:auto;max-height:200px;"><table id="cost-preview-table"></table></div>
+              <div class="flex gap-8 mt-14">
+                <button class="btn btn-primary" onclick="uploadCostData()">Đẩy lên Supabase</button>
+                <button class="btn" onclick="cancelCostUpload()">Hủy</button>
+              </div>
+            </div>
+          </div></div>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">Lịch sử giá vốn</div>
+          <div class="search-wrap"><span class="search-wrap-icon">⌕</span><input type="text" placeholder="Tìm SKU..." oninput="filterCostHistory(this.value)"></div>
+        </div>
+        <table>
+          <thead><tr><th>SKU</th><th>Tên sản phẩm</th><th>Category</th><th class="right">Ngày hiệu lực</th><th class="right">Giá vốn</th><th>Ghi chú</th><th></th></tr></thead>
+          <tbody id="cost-history-body"><tr><td colspan="7" class="loading">Đang tải...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VIEW: TREND THEO SKU -->
+    <div id="cost-view-trend" style="display:none;">
+      <div style="display:flex;gap:12px;margin-bottom:16px;align-items:flex-end;flex-wrap:wrap;">
+        <div style="flex:1;max-width:360px;">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Tìm SKU cụ thể (≥1 ký tự, Enter để lọc)</div>
+          <div style="position:relative;">
+            <input type="text" id="trend-sku-input" class="filter-select" placeholder="VD: LHC, ENA..." oninput="searchTrendSku(this.value)" onkeydown="if(event.key==='Enter'){applyTrendSearch();}" style="width:100%;">
+            <div id="trend-sku-dropdown" class="sku-search-result"></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text3);">
+          Top <select class="filter-select" id="trend-top-n" onchange="renderCostHeatmap(null)" style="width:70px;">
+            <option value="10">10</option><option value="20" selected>20</option><option value="30">30</option>
+          </select> SKU có nhiều lần cập nhật nhất
+        </div>
+        <button class="btn btn-sm" onclick="clearTrendSku()">Xem tất cả</button>
+      </div>
+
+      <!-- Heatmap -->
+      <div class="chart-card" style="margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="chart-title" style="margin-bottom:0;" id="trend-chart-title">Heatmap giá vốn — Top 20 SKU</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text3);">
+            <span>Thấp</span>
+            <div id="cost-heatmap-legend" style="display:flex;gap:2px;"></div>
+            <span>Cao</span>
+          </div>
+        </div>
+        <div id="cost-heatmap-wrap" style="overflow-x:auto;"></div>
+      </div>
+
+      <!-- Bảng lịch sử SKU được chọn -->
+      <div class="table-card" id="cost-trend-detail" style="display:none;">
+        <div class="table-header"><div class="table-title" id="trend-table-title">Lịch sử giá vốn</div></div>
+        <table>
+          <thead><tr><th>Ngày hiệu lực</th><th class="right">Giá vốn</th><th class="right">% thay đổi</th><th>Ghi chú</th></tr></thead>
+          <tbody id="trend-history-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VIEW: THEO CATEGORY -->
+    <div id="cost-view-category" style="display:none;">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">Giá vốn trung bình theo Category</div>
+          <div style="font-size:11px;color:var(--text3);">Dựa trên giá vốn hiện hành của từng SKU</div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Medium Category</th><th>Large Category</th>
+            <th class="right">SKU có giá</th><th class="right">Tổng SKU</th>
+            <th class="right">Giá TB</th><th class="right">Min</th><th class="right">Max</th>
+            <th class="right">% Coverage</th>
+          </tr></thead>
+          <tbody id="cost-cat-body"><tr><td colspan="8" class="loading">Đang tải...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB: SKU MAPPING ===== -->
+  <div class="tab-panel" id="panel-mapping">
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-title">SKU chưa mapping được</div>
+        <div class="flex gap-6">
+          <div class="search-wrap"><span class="search-wrap-icon">⌕</span><input type="text" placeholder="Tìm SKU..." oninput="filterMappingTable(this.value)"></div>
+          <button class="btn btn-sm" onclick="loadMappingAndUncat()">↻ Refresh</button>
+        </div>
+      </div>
+      <table>
+        <thead><tr>
+          <th>SKU từ file</th>
+          <th>Gợi ý gần nhất</th>
+          <th>SKU điều chỉnh</th>
+          <th>Large Category</th>
+          <th>Medium Category</th>
+          <th>Trạng thái</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="mapping-body"><tr><td colspan="7" class="loading">Đang tải...</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header"><div class="table-title">Đã mapping</div></div>
+      <table>
+        <thead><tr>
+          <th>SKU gốc</th><th>SKU điều chỉnh</th><th>SKU final</th><th></th>
+        </tr></thead>
+        <tbody id="mapped-body"><tr><td colspan="4" class="loading">Đang tải...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== TAB: ADMIN ===== -->
+  <div class="tab-panel" id="panel-admin">
+    <div class="flex gap-8" style="margin-bottom:16px;">
+      <button class="btn" id="admin-mode-config" onclick="setAdminMode('config')" style="background:var(--green-bg);color:var(--green);border-color:var(--green3);">Cấu hình platform</button>
+      <button class="btn" id="admin-mode-lock" onclick="setAdminMode('lock')">Lock tháng</button>
+      <button class="btn" id="admin-mode-audit" onclick="setAdminMode('audit')">🔍 Audit dữ liệu</button>
+    </div>
+
+    <!-- Config -->
+    <div id="admin-config">
+      <div id="config-list"><div class="loading">Đang tải...</div></div>
+      <button class="btn mt-14" onclick="addPlatform()">+ Thêm platform</button>
+    </div>
+
+    <!-- Lock -->
+    <div id="admin-lock" style="display:none;">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Thêm tháng</div></div>
+        <div style="padding:12px 16px;display:flex;gap:8px;align-items:flex-end;background:var(--bg);border-bottom:0.5px solid var(--border);">
+          <div class="form-group">
+            <label>Chọn tháng</label>
+            <input type="month" id="new-month" style="width:180px;">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="addMonth()">Thêm</button>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">Danh sách tháng</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-sm btn-primary" onclick="lockAllPastMonths()">🔒 Lock tất cả tháng cũ</button>
+            <button class="btn btn-sm btn-danger" onclick="unlockAllMonths()">🔓 Unlock tất cả</button>
+            <button class="btn btn-sm" onclick="loadLocks()">↻ Refresh</button>
+          </div>
+        </div>
+        <div id="lock-list"><div class="loading">Đang tải...</div></div>
+      </div>
+    </div>
+
+    <!-- Audit -->
+    <div id="admin-audit" style="display:none;">
+      <div style="position:sticky;top:0;z-index:10;background:var(--bg3);border-bottom:0.5px solid var(--border);padding:10px 0 10px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:12px;color:var(--text3);">Kiểm tra tự động dựa trên dữ liệu đang load. Chạy sau khi data đã load xong.</div>
+          <button class="btn btn-sm btn-primary" onclick="runAudit()">▶ Chạy Audit</button>
+        </div>
+        <div id="audit-summary" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+      </div>
+
+      <!-- Check 1: GM% bất thường -->
+      <div class="table-card" id="anchor-gm" style="margin-bottom:12px;">
+        <div class="table-header">
+          <div class="table-title">⚠️ GM% bất thường (= 0%, 100%, hoặc âm)</div>
+          <div id="audit-gm-count" style="font-size:12px;color:var(--text3);"></div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr>
+              <th>SKU</th><th>Tên sản phẩm</th><th>Sàn</th>
+              <th class="right">Doanh thu</th><th class="right">Giá vốn</th><th class="right">GM%</th><th>Vấn đề</th>
+            </tr></thead>
+            <tbody id="audit-gm-body"><tr><td colspan="7" class="empty">Chưa chạy audit</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Check 2: Missing COGS -->
+      <div class="table-card" id="anchor-cogs" style="margin-bottom:12px;">
+        <div class="table-header">
+          <div class="table-title">❌ SKU có doanh thu nhưng Giá vốn = 0</div>
+          <div id="audit-cogs-count" style="font-size:12px;color:var(--text3);"></div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr>
+              <th>SKU</th><th>Tên sản phẩm</th><th>Sàn</th>
+              <th class="right">SL bán</th><th class="right">Doanh thu</th><th class="right">Giá vốn</th>
+            </tr></thead>
+            <tbody id="audit-cogs-body"><tr><td colspan="6" class="empty">Chưa chạy audit</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Check 3: Spike -->
+      <div class="table-card" id="anchor-spike" style="margin-bottom:12px;">
+        <div class="table-header">
+          <div class="table-title">📈 Ngày có doanh thu đột biến (>3x median)</div>
+          <div id="audit-spike-count" style="font-size:12px;color:var(--text3);"></div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr>
+              <th>Ngày</th><th>Sàn</th>
+              <th class="right">Doanh thu ngày đó</th><th class="right">Median</th><th class="right">Bội số</th>
+            </tr></thead>
+            <tbody id="audit-spike-body"><tr><td colspan="5" class="empty">Chưa chạy audit</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Check 4: Gap -->
+      <div class="table-card" id="anchor-gap" style="margin-bottom:12px;">
+        <div class="table-header">
+          <div class="table-title">🕳️ Tháng thiếu data hoàn toàn</div>
+        </div>
+        <div id="audit-gap-body" style="padding:12px 16px;font-size:13px;color:var(--text3);">Chưa chạy audit</div>
+      </div>
+
+      <!-- Check 5: Negative revenue -->
+      <div class="table-card" id="anchor-neg">
+        <div class="table-header">
+          <div class="table-title">🔴 SKU có doanh thu âm (hoàn hàng?)</div>
+          <div id="audit-neg-count" style="font-size:12px;color:var(--text3);"></div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr>
+              <th>SKU</th><th>Sàn</th><th>Ngày</th>
+              <th class="right">Doanh thu</th><th class="right">Giá vốn</th>
+            </tr></thead>
+            <tbody id="audit-neg-body"><tr><td colspan="5" class="empty">Chưa chạy audit</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const SUPABASE_URL = 'https://wbyjmcqzqpglzpuqknca.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_UWUgQTsj0RRjv7dhWLfe4g_RmARYTlt';
+const ADMIN_KEY    = 't5bzDXtgkbFcF41F8MKHkg';
+
+// ============================================================
+// STATE
+// ============================================================
+let gran      = 'month';
+let yearFrom  = new Date().getFullYear();
+let yearTo    = new Date().getFullYear();
+let platform  = 'all';
+let year      = new Date().getFullYear();
+let monthFrom = '2026-05';
+let monthTo   = '2026-05';
+let dateFrom  = null;
+let dateTo    = null;
+
+let skuMasterCache = [];
+let costHistoryAll = [];
+let skuTableAll    = [];
+let salesSkuAll    = [];
+let selectedSku    = null;
+let displayUnit    = 'vnd'; // 'vnd' | 'mvnd' | 'kvnd'
+
+// ---- Master data cache (fetch 1 lần, filter trên client) ----
+let _allOrders       = null;   // Toàn bộ orders, không filter
+let _allOrdersLoaded = false;
+let _dataLoading     = false;
+// Pending time range (chờ user ấn Apply trước khi fetch nếu range thay đổi ngoài cache)
+let _pendingTimeChange = false;
+
+// ============================================================
+// SUPABASE
+// ============================================================
+function sbHeaders(extra = {}) {
+  return { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', ...extra };
+}
+async function sbGet(table, params = '') {
+  const pageSize = 1000;
+  const baseParams = params.replace(/[&?]limit=\d+/g,'').replace(/[&?]offset=\d+/g,'');
+  const sep = baseParams.includes('?') ? '&' : '?';
+  let all = [], offset = 0;
+  while (true) {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/${table}${baseParams}${sep}limit=${pageSize}&offset=${offset}`,
+      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' } }
+    );
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) break;
+    all = all.concat(data);
+    if (data.length < pageSize) break;
+    offset += pageSize;
+  }
+  return all;
+}
+async function sbRpc(fn, params = {}) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+    method: 'POST',
+    headers: sbHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(params)
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+async function sbPost(table, data, prefer = 'return=minimal') {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: 'POST', headers: sbHeaders({ 'Prefer': prefer }), body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return prefer.includes('return=representation') ? res.json() : null;
+}
+async function sbUpsert(table, data) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: 'POST', headers: sbHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }), body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error(await res.text());
+}
+async function sbDelete(table, filter) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+    method: 'DELETE', headers: sbHeaders({ 'Prefer': 'return=minimal' })
+  });
+  if (!res.ok) throw new Error(await res.text());
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded', async () => {
+  // Check admin key
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('key') === ADMIN_KEY) {
+    document.getElementById('admin-nav').style.display = 'flex';
+  }
+
+  // Init time controls
+  renderTimeControls();
+
+  // Connect + load all orders once
+  try {
+    setLoadingState(true, 'Đang kết nối...');
+    await sbGet('orders', '?select=order_id&limit=1');
+    document.getElementById('conn-dot').classList.add('ok');
+    document.getElementById('conn-text').textContent = 'Đã kết nối';
+  } catch(e) {
+    document.getElementById('conn-text').textContent = 'Lỗi kết nối';
+    setLoadingState(false);
+    return;
+  }
+
+  await loadSkuMaster();
+  buildCatDatalist();
+
+  // Fetch toàn bộ orders 1 lần duy nhất
+  await fetchAllOrders();
+
+  // Render lần đầu với filter hiện tại
+  renderFromCache();
+
+  loadCostHistory();
+  loadMappingAndUncat();
+});
+
+// Hiển thị trạng thái loading trên topbar
+function setLoadingState(on, msg) {
+  const dot  = document.getElementById('conn-dot');
+  const text = document.getElementById('conn-text');
+  if (on) {
+    dot.classList.remove('ok');
+    dot.style.background = '#FAC775';
+    text.textContent = msg || 'Đang tải...';
+  } else {
+    dot.style.background = '';
+    dot.classList.add('ok');
+    text.textContent = 'Đã kết nối';
+  }
+}
+
+async function fetchAllOrders(forceRefetch) {
+  if (_dataLoading) return;
+  _dataLoading = true;
+  setLoadingState(true, 'Đang tải dữ liệu...');
+  try {
+    // Dùng RPC để fetch pre-aggregated data — nhanh hơn raw rows
+    const raw = await sbGet('rpc/get_orders_summary', '');
+    // Map về format giống raw orders để các hàm filter/render không đổi
+    _allOrders = raw.map(r => ({
+      order_id:    r.order_date + '|' + r.platform + '|' + r.sku, // synthetic key
+      sku:         r.sku,
+      product_name: r.product_name,
+      revenue:     Number(r.revenue) || 0,
+      cogs:        Number(r.cogs) || 0,
+      gross_profit: Number(r.gross_profit) || 0,
+      gm_pct:      r.revenue > 0 ? r.gross_profit / r.revenue : 0,
+      qty:         Number(r.qty) || 0,
+      order_date:  r.order_date,
+      platform:    r.platform,
+      _order_count: Number(r.order_count) || 0,
+    }));
+    _allOrdersLoaded = true;
+  } catch(e) {
+    // Fallback về raw fetch nếu RPC chưa có
+    console.warn('RPC failed, falling back to raw fetch:', e.message);
+    try {
+      _allOrders = await sbGet('orders',
+        `?select=order_id,sku,product_name,revenue,cogs,gross_profit,gm_pct,qty,order_date,platform&order=order_date.asc`
+      );
+      const seen = new Set();
+      _allOrders = _allOrders.filter(r => {
+        const key = r.order_id + '|' + r.sku;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      _allOrdersLoaded = true;
+    } catch(e2) {
+      showToast('Lỗi tải dữ liệu: ' + e2.message, 'error');
+    }
+  } finally {
+    _dataLoading = false;
+    setLoadingState(false);
+  }
+}
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function switchTab(tab) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.nav-tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+  document.getElementById(`panel-${tab}`).classList.add('active');
+
+  // Show/hide filter bar
+  const noFilter = ['cost','mapping','admin'];
+  document.getElementById('filter-bar').style.display = noFilter.includes(tab) ? 'none' : '';
+}
+
+// ============================================================
+// FILTERS
+// ============================================================
+function setGran(g) {
+  gran = g;
+  document.querySelectorAll('#gran-seg .seg-btn').forEach((b,i) => b.classList.toggle('active', ['year','month','day'][i] === g));
+  if (g === 'day') { dateFrom = null; dateTo = null; }
+  renderTimeControls();
+  // Đổi gran: cần user ấn Apply mới fetch (time range mới chưa rõ)
+  // Nhưng nếu đã có data, render ngay với gran mới
+  if (_allOrdersLoaded) renderFromCache();
+}
+
+function renderTimeControls() {
+  const el = document.getElementById('time-controls');
+  const applyBtn = `<button class="apply-btn" onclick="applyTimeFilter()" title="Áp dụng (Enter)">↵ Áp dụng</button>`;
+  if (gran === 'year') {
+    const curYear = new Date().getFullYear();
+    const years = Array.from({length: curYear - 2023}, (_,i) => 2024 + i);
+    el.innerHTML = `
+      <div class="flex gap-8" style="align-items:center;">
+        <select class="filter-select" id="year-from" onchange="markPending()" onkeydown="if(event.key==='Enter'){event.preventDefault();applyTimeFilter();}" style="width:90px;">
+          ${years.map(y=>`<option${y===yearFrom?' selected':''}>${y}</option>`).join('')}
+        </select>
+        <span style="color:var(--text3);font-size:12px;">→</span>
+        <select class="filter-select" id="year-to" onchange="markPending()" onkeydown="if(event.key==='Enter'){event.preventDefault();applyTimeFilter();}" style="width:90px;">
+          ${years.map(y=>`<option${y===yearTo?' selected':''}>${y}</option>`).join('')}
+        </select>
+        ${applyBtn}
+      </div>`;
+  } else if (gran === 'month') {
+    el.innerHTML = `
+      <div class="flex gap-8" style="align-items:center;">
+        <input type="month" class="filter-select" id="month-from" value="${monthFrom}" onchange="markPending()" onkeydown="if(event.key==='Enter')applyTimeFilter()" style="width:140px;">
+        <span style="color:var(--text3);font-size:12px;">→</span>
+        <input type="month" class="filter-select" id="month-to"   value="${monthTo}"   onchange="markPending()" onkeydown="if(event.key==='Enter')applyTimeFilter()" style="width:140px;">
+        ${applyBtn}
+      </div>`;
+  } else {
+    const today = new Date().toISOString().slice(0,10);
+    const ago30 = new Date(Date.now()-30*86400000).toISOString().slice(0,10);
+    if (!dateFrom) dateFrom = ago30;
+    if (!dateTo)   dateTo   = today;
+    el.innerHTML = `
+      <div class="flex gap-8" style="align-items:center;">
+        <input type="date" class="filter-select" id="date-from" value="${dateFrom}" onchange="markPending()" onkeydown="if(event.key==='Enter')applyTimeFilter()" style="width:130px;">
+        <span style="color:var(--text3);font-size:12px;">→</span>
+        <input type="date" class="filter-select" id="date-to"   value="${dateTo}"   onchange="markPending()" onkeydown="if(event.key==='Enter')applyTimeFilter()" style="width:130px;">
+        ${applyBtn}
+      </div>`;
+  }
+}
+
+// Đánh dấu time range đang pending (chưa apply)
+function markPending() {
+  _pendingTimeChange = true;
+  const btn = document.querySelector('.apply-btn');
+  if (btn) { btn.classList.add('apply-pending'); btn.textContent = '↵ Áp dụng ●'; }
+}
+
+// Apply time filter: đọc giá trị, render từ cache (hoặc refetch nếu cần)
+function getActiveTab() {
+  const active = document.querySelector('.nav-tab.active');
+  if (!active) return 'overview';
+  const m = active.getAttribute('onclick')?.match(/switchTab\('(.+?)'\)/);
+  return m ? m[1] : 'overview';
+}
+
+function refreshActiveTab() {
+  const tab = getActiveTab();
+  renderFromCache(); // always update overview KPIs
+  if (tab === 'sales' && _allOrdersLoaded) setSalesView(salesView || 'sku');
+}
+
+function applyTimeFilter() {
+  _pendingTimeChange = false;
+  if (gran === 'year') {
+    yearFrom = parseInt(document.getElementById('year-from')?.value) || yearFrom;
+    yearTo   = parseInt(document.getElementById('year-to')?.value)   || yearTo;
+    if (yearTo < yearFrom) { yearTo = yearFrom; document.getElementById('year-to').value = yearTo; }
+  } else if (gran === 'month') {
+    monthFrom = document.getElementById('month-from')?.value || monthFrom;
+    monthTo   = document.getElementById('month-to')?.value   || monthTo;
+    if (monthTo < monthFrom) { monthTo = monthFrom; document.getElementById('month-to').value = monthTo; }
+  } else {
+    dateFrom = document.getElementById('date-from')?.value;
+    dateTo   = document.getElementById('date-to')?.value;
+  }
+  const btn = document.querySelector('.apply-btn');
+  if (btn) { btn.classList.remove('apply-pending'); btn.textContent = '↵ Áp dụng'; }
+  refreshActiveTab();
+}
+
+// Keyboard shortcut: Enter anywhere in filter bar triggers apply
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && _pendingTimeChange) {
+    e.preventDefault();
+    applyTimeFilter();
+  }
+});
+
+function setPlatform(p) {
+  platform = p;
+  ['all','t2c','k2c','tiktok'].forEach(id => {
+    const btn = document.getElementById(`plat-${id}`);
+    btn.className = `plat-btn plat-${id}` + (id === p ? ' is-active' : '');
+  });
+  const fb = document.getElementById('filter-bar');
+  fb.className = 'filter-bar' + (p !== 'all' ? ` plat-${p}` : '');
+  // Instant — filter trên client
+  refreshActiveTab();
+}
+
+function getDateFilter() {
+  if (gran === 'year') {
+    return `order_date=gte.${yearFrom}-01-01&order_date=lte.${yearTo}-12-31`;
+  } else if (gran === 'month') {
+    // monthFrom/monthTo dang YYYY-MM
+    const fromDate = monthFrom + '-01';
+    const [toY, toM] = monthTo.split('-').map(Number);
+    const lastDay = new Date(toY, toM, 0).getDate();
+    const toDate  = `${monthTo}-${String(lastDay).padStart(2,'0')}`;
+    return `order_date=gte.${fromDate}&order_date=lte.${toDate}`;
+  } else {
+    return `order_date=gte.${dateFrom||'2024-01-01'}&order_date=lte.${dateTo||new Date().toISOString().slice(0,10)}`;
+  }
+}
+
+// Pastel color ramps: [rank1=dam, rank2=trung, rank3=nhat]
+function getPlatformFilter() {
+  if (platform === 'all') return '';
+  const map = { t2c: 'shopee_t2c', k2c: 'shopee_k2c', tiktok: 'tiktok' };
+  return `&platform=eq.${map[platform]}`;
+}
+
+// ============================================================
+// OVERVIEW — client-side filtering từ _allOrders
+// ============================================================
+
+// Filter _allOrders theo date range và platform hiện tại
+function getFilteredOrders() {
+  if (!_allOrders) return [];
+  const platMap = { t2c: 'shopee_t2c', k2c: 'shopee_k2c', tiktok: 'tiktok' };
+  const platVal = platMap[platform] || null;
+
+  let fromStr, toStr;
+  if (gran === 'year') {
+    fromStr = `${yearFrom}-01-01`;
+    toStr   = `${yearTo}-12-31`;
+  } else if (gran === 'month') {
+    fromStr = monthFrom + '-01';
+    const [toY, toM] = monthTo.split('-').map(Number);
+    const lastDay = new Date(toY, toM, 0).getDate();
+    toStr = `${monthTo}-${String(lastDay).padStart(2,'0')}`;
+  } else {
+    fromStr = dateFrom || '2024-01-01';
+    toStr   = dateTo   || new Date().toISOString().slice(0,10);
+  }
+
+  return _allOrders.filter(r => {
+    if (!r.order_date) return false;
+    const d = String(r.order_date).slice(0,10);
+    if (d < fromStr || d > toStr) return false;
+    if (platVal && r.platform !== platVal) return false;
+    return true;
+  });
+}
+
+// Group orders theo granularity cho chart — fill gaps
+function groupOrdersByPeriod(orders, g) {
+  const map = {};
+  orders.forEach(r => {
+    const d = r.order_date ? String(r.order_date) : '';
+    let key = '';
+    if (g === 'year')       key = d.slice(0,4);
+    else if (g === 'month') key = d.slice(0,7);
+    else                    key = d.slice(0,10);
+    if (!key) return;
+    if (!map[key]) map[key] = { period: key, revenue: 0, cogs: 0, gross_profit: 0 };
+    map[key].revenue      += Number(r.revenue) || 0;
+    map[key].cogs         += Number(r.cogs) || 0;
+    map[key].gross_profit += Number(r.gross_profit) || 0;
+  });
+
+  const result = Object.values(map)
+    .sort((a,b) => a.period.localeCompare(b.period))
+    .map(r => ({ ...r, gm_pct: r.revenue > 0 ? r.gross_profit / r.revenue * 100 : 0 }));
+
+  // Fill gaps cho month granularity
+  if (g === 'month' && result.length >= 2) {
+    const filled = [];
+    for (let i = 0; i < result.length; i++) {
+      filled.push(result[i]);
+      if (i < result.length - 1) {
+        const [y1, m1] = result[i].period.split('-').map(Number);
+        const [y2, m2] = result[i+1].period.split('-').map(Number);
+        let cy = y1, cm = m1 + 1;
+        while (cy * 12 + cm < y2 * 12 + m2) {
+          const p = `${cy}-${String(cm).padStart(2,'0')}`;
+          filled.push({ period: p, revenue: 0, cogs: 0, gross_profit: 0, gm_pct: 0 });
+          cm++; if (cm > 12) { cm = 1; cy++; }
+        }
+      }
+    }
+    return filled;
+  }
+  return result;
+}
+
+// Build SKU table từ filtered orders
+function buildSkuTableFromOrders(orders) {
+  const master = {};
+  skuMasterCache.forEach(s => master[s.sku] = s);
+  const platMap = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop' };
+  const bySkuPlat = {};
+  orders.forEach(r => {
+    const key = (r.sku||'') + '|' + (r.platform||'');
+    if (!bySkuPlat[key]) bySkuPlat[key] = { sku: r.sku, product_name: r.product_name, platform: r.platform, qty: 0, rev: 0, cogs: 0, profit: 0 };
+    bySkuPlat[key].qty    += +r.qty || 0;
+    bySkuPlat[key].rev    += +r.revenue || 0;
+    bySkuPlat[key].cogs   += +r.cogs || 0;
+    bySkuPlat[key].profit += +r.gross_profit || 0;
+  });
+  skuTableAll = Object.values(bySkuPlat)
+    .sort((a,b) => b.rev - a.rev)
+    .map((r,i) => ({ rank: i+1, ...r, gm: r.rev > 0 ? r.profit/r.rev*100 : 0 }));
+
+  document.getElementById('sku-table-body').innerHTML = skuTableAll.map(r => {
+    const m   = master[r.sku] || {};
+    const lc  = m.large_category;
+    const mc  = m.medium_category;
+    const cat = [lc, mc].filter(Boolean).join(' › ') || '—';
+    const platTag = r.platform
+      ? `<span class="plat-tag tag-${r.platform==='shopee_t2c'?'t2c':r.platform==='shopee_k2c'?'k2c':'tiktok'}">${platMap[r.platform]||r.platform}</span>`
+      : '<span style="color:var(--text3);">—</span>';
+    return `<tr>
+      <td style="color:var(--text3);">${r.rank}</td>
+      <td class="mono" style="font-size:11px;">${r.sku}</td>
+      <td>${r.product_name || m.product_name || '—'}</td>
+      <td style="color:var(--text3);font-size:12px;">${cat}</td>
+      <td>${platTag}</td>
+      <td class="right">${r.qty.toLocaleString('en-US')}</td>
+      <td class="right">${fmtMoney(r.rev)}</td>
+      <td class="right">${fmtMoney(r.cogs)}</td>
+      <td class="right">${fmtMoney(r.profit)}</td>
+      <td class="right"><span class="gm-badge ${r.gm>=30?'gm-high':r.gm>=15?'gm-mid':'gm-low'}">${r.gm.toFixed(1)}%</span></td>
+      <td class="right">${fmtMoney(r.qty > 0 ? Math.round(r.rev / r.qty) : 0)}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="11" class="empty">Không có dữ liệu</td></tr>';
+  makeSortable('tbl-sku');
+}
+
+// Tính date range của kỳ trước (cùng độ dài, liền kề)
+function getPrevDateRange(fromStr, toStr) {
+  const from = new Date(fromStr);
+  const to   = new Date(toStr);
+  const diffMs = to - from + 86400000; // số ms của kỳ hiện tại (inclusive)
+  const prevTo   = new Date(from - 86400000); // ngày trước fromStr
+  const prevFrom = new Date(prevTo - diffMs + 86400000);
+  return {
+    fromStr: prevFrom.toISOString().slice(0,10),
+    toStr:   prevTo.toISOString().slice(0,10),
+  };
+}
+
+function getCurrentDateRange() {
+  if (gran === 'year') {
+    return { fromStr: `${yearFrom}-01-01`, toStr: `${yearTo}-12-31` };
+  } else if (gran === 'month') {
+    const from = monthFrom + '-01';
+    const [toY, toM] = monthTo.split('-').map(Number);
+    const lastDay = new Date(toY, toM, 0).getDate();
+    return { fromStr: from, toStr: `${monthTo}-${String(lastDay).padStart(2,'0')}` };
+  } else {
+    return { fromStr: dateFrom || '2024-01-01', toStr: dateTo || new Date().toISOString().slice(0,10) };
+  }
+}
+
+function fmtDelta(curr, prev, isPercent) {
+  if (!prev || prev === 0) return { text: '—', cls: 'delta-neu' };
+  const pct = (curr - prev) / Math.abs(prev) * 100;
+  const sign = pct >= 0 ? '↑' : '↓';
+  const cls  = pct >= 0 ? 'delta-up' : 'delta-dn';
+  const val  = isPercent
+    ? (curr - prev).toFixed(1) + 'pp'    // percentage point difference
+    : Math.abs(pct).toFixed(1) + '%';
+  return { text: `${sign} ${val} so kỳ trước`, cls };
+}
+
+// Render toàn bộ tab Tổng quan từ cache — không network
+function renderFromCache() {
+  if (!_allOrdersLoaded) return;
+
+  const orders = getFilteredOrders();
+
+  // KPIs hiện tại
+  const revenue = orders.reduce((s,r) => s + (Number(r.revenue)||0), 0);
+  const profit  = orders.reduce((s,r) => s + (Number(r.gross_profit)||0), 0);
+  const gm      = revenue > 0 ? profit / revenue * 100 : 0;
+  // Dùng _order_count nếu có (từ RPC), fallback về unique order_id
+  const nOrders = orders[0]?._order_count !== undefined
+    ? orders.reduce((s,r) => s + (Number(r._order_count)||0), 0)
+    : new Set(orders.map(r => String(r.order_id))).size;
+  const aov     = nOrders > 0 ? revenue / nOrders : 0;
+
+  document.getElementById('kpi-revenue').textContent = fmtMoney(revenue);
+  document.getElementById('kpi-gm').textContent      = gm.toFixed(1) + '%';
+  document.getElementById('kpi-profit').textContent  = fmtMoney(profit);
+  document.getElementById('kpi-orders').textContent  = nOrders.toLocaleString('en-US');
+  document.getElementById('kpi-aov').textContent = displayUnit === 'vnd'
+    ? Math.round(aov).toLocaleString('en-US')
+    : fmtMoney(aov);
+
+  // Delta — so kỳ trước liền kề (filter trên client, 0 network)
+  const { fromStr, toStr } = getCurrentDateRange();
+  const prev = getPrevDateRange(fromStr, toStr);
+  const platMap2 = { t2c: 'shopee_t2c', k2c: 'shopee_k2c', tiktok: 'tiktok' };
+  const platVal  = platMap2[platform] || null;
+  const prevOrders = (_allOrders || []).filter(r => {
+    if (!r.order_date) return false;
+    const d = String(r.order_date).slice(0,10);
+    if (d < prev.fromStr || d > prev.toStr) return false;
+    if (platVal && r.platform !== platVal) return false;
+    return true;
+  });
+  const pRev    = prevOrders.reduce((s,r) => s + (Number(r.revenue)||0), 0);
+  const pProfit = prevOrders.reduce((s,r) => s + (Number(r.gross_profit)||0), 0);
+  const pGm     = pRev > 0 ? pProfit / pRev * 100 : 0;
+  const pOrders = new Set(prevOrders.map(r => String(r.order_id))).size;
+  const pAov    = pOrders > 0 ? pRev / pOrders : 0;
+
+  const prevLabel = `${prev.fromStr} → ${prev.toStr}`;
+  const setDelta = (id, curr, prev, isPercent) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const { text, cls } = fmtDelta(curr, prev, isPercent);
+    el.textContent = text;
+    el.className   = `kpi-delta ${cls}`;
+    el.title       = `Kỳ trước: ${prevLabel}`;
+  };
+  setDelta('kpi-revenue-d', revenue, pRev,    false);
+  setDelta('kpi-gm-d',      gm,      pGm,     true);
+  setDelta('kpi-profit-d',  profit,  pProfit, false);
+  setDelta('kpi-orders-d',  nOrders, pOrders, false);
+  setDelta('kpi-aov-d',     aov,     pAov,    false);
+
+  // Charts & tables — delegate to active sub-tab
+  const chartData = groupOrdersByPeriod(orders, gran);
+  if (chartView === 'summary')  { renderGmChart(chartData); renderRevCogsChart(chartData); buildTimeTable(orders); }
+  if (chartView === 'sku')      { renderSkuCharts(orders); buildSkuTableFromOrders(orders); }
+  if (chartView === 'category') { renderCatCharts(orders); buildCatTableFromOrders(orders); }
+}
+
+// loadOverview kept for compatibility — now just delegates
+function loadOverview() { renderFromCache(); }
+
+// ---- Table: Time detail (subtab Overview) ----
+function buildTimeTable(orders) {
+  const platMap = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop', all: 'Tất cả' };
+  const platVal = platform === 'all' ? null : { t2c:'shopee_t2c', k2c:'shopee_k2c', tiktok:'tiktok' }[platform];
+  const map = {};
+  orders.forEach(r => {
+    const d = String(r.order_date||'');
+    const p = gran==='year' ? d.slice(0,4) : gran==='month' ? d.slice(0,7) : d.slice(0,10);
+    if (!p) return;
+    if (!map[p]) map[p] = { period: p, rev: 0, cogs: 0, profit: 0, orders: 0 };
+    map[p].rev    += Number(r.revenue) || 0;
+    map[p].cogs   += Number(r.cogs) || 0;
+    map[p].profit += Number(r.gross_profit) || 0;
+    map[p].orders += r._order_count !== undefined ? (Number(r._order_count)||0) : 1;
+  });
+  const rows = Object.values(map).sort((a,b) => b.period.localeCompare(a.period));
+  const platLabel = platVal ? platMap[{ shopee_t2c:'t2c', shopee_k2c:'k2c', tiktok:'tiktok' }[platVal]] || platVal : 'Tất cả';
+  document.getElementById('time-table-body').innerHTML = rows.map(r => {
+    const gm = r.rev > 0 ? r.profit/r.rev*100 : 0;
+    return `<tr>
+      <td style="font-size:13px;">${r.period}</td>
+      <td style="color:var(--text3);">${platLabel}</td>
+      <td class="right">${fmtMoney(r.rev)}</td>
+      <td class="right">${fmtMoney(r.cogs)}</td>
+      <td class="right">${fmtMoney(r.profit)}</td>
+      <td class="right"><span class="gm-badge ${gm>=30?'gm-high':gm>=15?'gm-mid':'gm-low'}">${gm.toFixed(1)}%</span></td>
+      <td class="right">${r.orders.toLocaleString('en-US')}</td>
+      <td class="right">${fmtMoney(r.orders > 0 ? Math.round(r.rev / r.orders) : 0)}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>';
+  makeSortable('tbl-time');
+}
+
+// Filter category table
+let _catTableAll = [];
+function filterCatTable(q) {
+  if (!q) { renderCatOverviewTable(_catTableAll); return; }
+  const ql = q.toLowerCase().trim();
+  renderCatOverviewTable(_catTableAll.filter(r =>
+    (r.med||'').toLowerCase().includes(ql) || (r.lrg||'').toLowerCase().includes(ql)
+  ));
+}
+function renderCatOverviewTable(rows) {
+  const platMap = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop' };
+  const platVal = platform === 'all' ? null : { t2c:'shopee_t2c', k2c:'shopee_k2c', tiktok:'tiktok' }[platform];
+  document.getElementById('cat-overview-body').innerHTML = rows.map((r,i) => {
+    const gm = r.rev > 0 ? r.profit/r.rev*100 : 0;
+    return `<tr>
+      <td style="color:var(--text3);">${i+1}</td>
+      <td style="font-weight:500;">${r.med}</td>
+      <td style="color:var(--text3);">${platVal ? (platMap[platVal]||platVal) : 'Tất cả'}</td>
+      <td class="right">${r.qty.toLocaleString('en-US')}</td>
+      <td class="right">${fmtMoney(r.rev)}</td>
+      <td class="right">${fmtMoney(r.cogs)}</td>
+      <td class="right">${fmtMoney(r.profit)}</td>
+      <td class="right"><span class="gm-badge ${gm>=30?'gm-high':gm>=15?'gm-mid':'gm-low'}">${gm.toFixed(1)}%</span></td>
+      <td class="right">${fmtMoney(r.qty > 0 ? Math.round(r.rev / r.qty) : 0)}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" class="empty">Không có dữ liệu</td></tr>';
+  makeSortable('tbl-cat-ovr');
+}
+
+// ============================================================
+// SORTABLE TABLE HELPER
+// ============================================================
+function makeSortable(tableId) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+  // Clone thead để xóa hết event listeners cũ
+  const thead = table.querySelector('thead');
+  if (!thead) return;
+  const newThead = thead.cloneNode(true);
+  thead.parentNode.replaceChild(newThead, thead);
+
+  const headers = newThead.querySelectorAll('th.sortable');
+  headers.forEach((th, colIdx) => {
+    let dir = null;
+    th.addEventListener('click', () => {
+      headers.forEach(h => h.classList.remove('sort-asc','sort-desc'));
+      dir = dir === 'asc' ? 'desc' : 'asc';
+      th.classList.add(dir === 'asc' ? 'sort-asc' : 'sort-desc');
+      const tbody = table.querySelector('tbody');
+      const rows  = [...tbody.querySelectorAll('tr')].filter(r => r.cells.length > 1);
+      rows.sort((a, b) => {
+        const av = a.cells[colIdx]?.getAttribute('data-sort') || a.cells[colIdx]?.textContent.trim() || '';
+        const bv = b.cells[colIdx]?.getAttribute('data-sort') || b.cells[colIdx]?.textContent.trim() || '';
+        const cleanNum = s => parseFloat(s.replace(/,/g,'').replace(/[^0-9.-]/g,''));
+        const an = cleanNum(av);
+        const bn = cleanNum(bv);
+        const isNum = !isNaN(an) && !isNaN(bn) && av !== '' && bv !== '';
+        const cmp = isNum ? an - bn : av.localeCompare(bv, 'vi');
+        return dir === 'asc' ? cmp : -cmp;
+      });
+      rows.forEach(r => tbody.appendChild(r));
+    });
+  });
+}
+function exportTableCSV() {
+  let rows, filename, headers;
+  const master = {};
+  skuMasterCache.forEach(s => master[s.sku] = s);
+  const platMap = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop' };
+
+  if (chartView === 'summary') {
+    // Time table
+    headers = ['Thời gian','Sàn','Doanh thu','Giá vốn','Lợi nhuận gộp','Gross Margin','Số Đơn','AOV'];
+    const orders = getFilteredOrders();
+    const map = {};
+    orders.forEach(r => {
+      const d = String(r.order_date||'');
+      const p = gran==='year'?d.slice(0,4):gran==='month'?d.slice(0,7):d.slice(0,10);
+      if (!p) return;
+      if (!map[p]) map[p] = { period: p, rev:0, cogs:0, profit:0, ords: 0 };
+      map[p].rev    += Number(r.revenue)||0;
+      map[p].cogs   += Number(r.cogs)||0;
+      map[p].profit += Number(r.gross_profit)||0;
+      map[p].ords   += r._order_count !== undefined ? (Number(r._order_count)||0) : 1;
+    });
+    rows = Object.values(map).sort((a,b)=>a.period.localeCompare(b.period)).map(r => {
+      const gm = r.rev > 0 ? (r.profit/r.rev*100).toFixed(2)+'%' : '0%';
+      return [r.period, platform==='all'?'Tất cả':platMap[{t2c:'shopee_t2c',k2c:'shopee_k2c',tiktok:'tiktok'}[platform]]||platform, r.rev, r.cogs, r.profit, gm, r.ords, r.ords>0?Math.round(r.rev/r.ords):0];
+    });
+    filename = 'overview_theo_thoi_gian.csv';
+
+  } else if (chartView === 'sku') {
+    headers = ['#','SKU','Tên sản phẩm','Large Category','Medium Category','Sàn','SL bán','Doanh thu','Giá vốn','Lợi nhuận','GM%'];
+    rows = skuTableAll.map(r => {
+      const m = master[r.sku] || {};
+      return [r.rank, r.sku, `"${(r.product_name||m.product_name||'').replace(/"/g,'""')}"`,
+        `"${(m.large_category||'').replace(/"/g,'""')}"`, `"${(m.medium_category||'').replace(/"/g,'""')}"`,
+        platMap[r.platform]||r.platform||'—', r.qty, r.rev, r.cogs||0, r.profit, (r.gm).toFixed(2)+'%'];
+    });
+    filename = 'top_sku_doanh_thu.csv';
+
+  } else {
+    headers = ['#','Medium Category','Large Category','Sàn','SL bán','Doanh thu','Giá vốn','Lợi nhuận','GM%'];
+    const platLabel = platform==='all'?'Tất cả':platMap[{t2c:'shopee_t2c',k2c:'shopee_k2c',tiktok:'tiktok'}[platform]]||platform;
+    rows = _catTableAll.map((r,i) => {
+      const gm = r.rev > 0 ? (r.profit/r.rev*100).toFixed(2)+'%' : '0%';
+      return [i+1, `"${r.med}"`, `"${r.lrg}"`, platLabel, r.qty, r.rev, r.cogs||0, r.profit, gm];
+    });
+    filename = 'top_category_doanh_thu.csv';
+  }
+
+  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a   = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Đã xuất ' + filename, 'success');
+}
+
+// ============================================================
+// CHART / TABLE VIEW STATE
+// ============================================================
+let chartView = 'summary'; // 'summary' | 'sku' | 'category'
+let tableView = 'sku';     // 'sku' | 'category'
+
+// Palette đa màu cho multi-series
+const C_REV  = 'rgba(99,153,34,0.85)';   // xanh lá — Doanh thu
+const C_COGS = 'rgba(180,180,180,0.75)'; // xám     — Giá vốn
+
+const PALETTE = [
+  '#3B6D11','#185FA5','#7a2844','#854F0B','#1a7a5e',
+  '#a33d00','#4a1a8a','#1a4a2a','#8a4a1a','#1a3a8a',
+  '#6B3FA0','#2E7D32','#C62828','#1565C0','#EF6C00',
+  '#00695C','#AD1457','#4527A0','#558B2F','#37474F',
+];
+
+function setChartView(v) {
+  chartView = v;
+  document.querySelectorAll('.ovr-chart-tab').forEach((b,i) =>
+    b.classList.toggle('active', ['summary','sku','category'][i] === v));
+  ['cv-summary','cv-sku','cv-category'].forEach((id,i) =>
+    document.getElementById(id).style.display = ['summary','sku','category'][i] === v ? '' : 'none');
+  if (!_allOrdersLoaded) return;
+  const orders = getFilteredOrders();
+  const chartData = groupOrdersByPeriod(orders, gran);
+  if (v === 'summary')  { renderGmChart(chartData); renderRevCogsChart(chartData); buildTimeTable(orders); }
+  if (v === 'sku')      { renderSkuCharts(orders); buildSkuTableFromOrders(orders); }
+  if (v === 'category') { renderCatCharts(orders); buildCatTableFromOrders(orders); }
+}
+
+function setTableView(v) {
+  tableView = v;
+  document.querySelectorAll('.ovr-table-tab').forEach((b,i) =>
+    b.classList.toggle('active', ['sku','category'][i] === v));
+  document.getElementById('tv-sku').style.display      = v === 'sku'      ? '' : 'none';
+  document.getElementById('tv-category').style.display = v === 'category' ? '' : 'none';
+  // Show/hide search
+  document.getElementById('table-search-wrap').style.display = v === 'sku' ? '' : 'none';
+  if (!_allOrdersLoaded) return;
+  const orders = getFilteredOrders();
+  if (v === 'sku')      buildSkuTableFromOrders(orders);
+  if (v === 'category') buildCatTableFromOrders(orders);
+}
+
+// ---- CHART: Theo SKU top 20 ----
+// Màu cố định cho 3 series
+function _makeHorizBar(canvasId, labels, revData, cogsData, gmData, qtyMode = false) {
+  _destroyChart(canvasId + '_inst');
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
+  canvas.parentElement.style.height = Math.max(200, labels.length * 38) + 'px';
+
+  const datasets = qtyMode
+    ? [{ label: 'SL bán', data: revData, backgroundColor: C_REV, borderRadius: 2 }]
+    : [
+        { label: 'Doanh thu', data: revData,  backgroundColor: C_REV,  borderRadius: 2 },
+        { label: 'Giá vốn',   data: cogsData, backgroundColor: C_COGS, borderRadius: 2 },
+      ];
+
+  window[canvasId + '_inst'] = new Chart(canvas, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: !qtyMode, position: 'top', labels: { font: { family: 'Nunito', size: 11 }, boxWidth: 12, padding: 12 } },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const v = ctx.parsed.x;
+              const base = ctx.dataset.label + ': ' + (qtyMode ? v.toLocaleString('en-US') : fmtMoneyShort(v));
+              if (!qtyMode && ctx.datasetIndex === 0 && gmData[ctx.dataIndex] != null)
+                return [base, 'GM%: ' + gmData[ctx.dataIndex].toFixed(1) + '%'];
+              return base;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { font: { family: 'Nunito', size: 10 }, color: '#888780', callback: v => qtyMode ? v.toLocaleString('en-US') : fmtMoneyShort(v) },
+          grid: { color: '#f0ede6', lineWidth: 0.5 }
+        },
+        y: { ticks: { font: { family: 'DM Mono', size: 11 }, color: '#2c2c2a' }, grid: { display: false } }
+      }
+    }
+  });
+  return window[canvasId + '_inst'];
+}
+
+function renderSkuCharts(orders) {
+  const bySku = {};
+  orders.forEach(r => {
+    const k = r.sku || '—';
+    if (!bySku[k]) bySku[k] = { sku: k, rev: 0, cogs: 0, profit: 0 };
+    bySku[k].rev    += Number(r.revenue) || 0;
+    bySku[k].cogs   += Number(r.cogs) || 0;
+    bySku[k].profit += Number(r.gross_profit) || 0;
+  });
+  const top20 = Object.values(bySku)
+    .sort((a,b) => b.rev - a.rev).slice(0, 20);
+
+  const labels   = top20.map(s => s.sku);
+  const revData  = top20.map(s => s.rev);
+  const cogsData = top20.map(s => s.cogs);
+  const gmData   = top20.map(s => s.rev > 0 ? s.profit / s.rev * 100 : 0);
+
+  _destroyChart('skuGmChart'); _destroyChart('skuRevChart');
+  _makeHorizBar('chart-sku-bar', labels, revData, cogsData, gmData);
+}
+
+function renderCatCharts(orders) {
+  const master = {};
+  skuMasterCache.forEach(s => master[s.sku] = s);
+
+  const byCat = {};
+  orders.forEach(r => {
+    const m = master[r.sku] || {};
+    const cat = m.medium_category || '(Chưa phân loại)';
+    if (!byCat[cat]) byCat[cat] = { rev: 0, cogs: 0, profit: 0 };
+    byCat[cat].rev    += Number(r.revenue) || 0;
+    byCat[cat].cogs   += Number(r.cogs) || 0;
+    byCat[cat].profit += Number(r.gross_profit) || 0;
+  });
+
+  const sorted = Object.entries(byCat).sort((a,b) => b[1].rev - a[1].rev);
+  const labels   = sorted.map(e => e[0]);
+  const revData  = sorted.map(e => e[1].rev);
+  const cogsData = sorted.map(e => e[1].cogs);
+  const gmData   = sorted.map(e => e[1].rev > 0 ? e[1].profit / e[1].rev * 100 : 0);
+
+  _destroyChart('catGmChart'); _destroyChart('catRevChart');
+  _makeHorizBar('chart-cat-bar', labels, revData, cogsData, gmData);
+}
+
+// Build Category table từ filtered orders
+function buildCatTableFromOrders(orders) {
+  const master = {};
+  skuMasterCache.forEach(s => master[s.sku] = s);
+  const byCat = {};
+  orders.forEach(r => {
+    const m = master[r.sku] || {};
+    const med = m.medium_category || '(Chưa phân loại)';
+    const lrg = m.large_category  || '—';
+    if (!byCat[med]) byCat[med] = { med, lrg, qty: 0, rev: 0, cogs: 0, profit: 0, ords: new Set() };
+    byCat[med].qty    += Number(r.qty) || 0;
+    byCat[med].rev    += Number(r.revenue) || 0;
+    byCat[med].cogs   += Number(r.cogs) || 0;
+    byCat[med].profit += Number(r.gross_profit) || 0;
+    byCat[med].ords.add(r.order_id);
+  });
+  _catTableAll = Object.values(byCat).sort((a,b) => b.rev - a.rev);
+  renderCatOverviewTable(_catTableAll);
+}
+
+// ---- Chart helper ----
+function _destroyChart(key) {
+  if (window[key]) { try { window[key].destroy(); } catch(e){} window[key] = null; }
+}
+function _makeChart(canvasId, type, labels, datasets, opts = {}) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
+  return new Chart(canvas, {
+    type,
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: datasets.length > 1,
+          position: 'bottom',
+          labels: { font: { family: 'Nunito', size: 10 }, boxWidth: 10, padding: 8 }
+        },
+        tooltip: {
+          callbacks: { label: ctx => ctx.dataset.label + ': ' + (opts.tooltipFmt ? opts.tooltipFmt(ctx.parsed.y) : ctx.parsed.y) }
+        }
+      },
+      scales: {
+        x: {
+          stacked: opts.stacked || false,
+          ticks: { font: { family: 'Nunito', size: 10 }, color: '#888780', maxRotation: 45, autoSkip: true, maxTicksLimit: 14 },
+          grid: { display: false }
+        },
+        y: {
+          stacked: opts.stacked || false,
+          ticks: { font: { family: 'Nunito', size: 10 }, color: '#888780', callback: opts.yFmt || (v => v) },
+          grid: { color: '#f0ede6', lineWidth: 0.5 }
+        }
+      }
+    }
+  });
+}
+
+let gmChartInstance = null;
+let revCogsChartInstance = null;
+
+function renderGmChart(chartData) {
+  if (!chartData || !chartData.length) return;
+  const labels = chartData.map(r => fmtGroupLabel(r.period, gran));
+  const gms    = chartData.map(r => { const v = Number(r.gm_pct)||0; return Math.abs(v)<=1?v*100:v; });
+  const canvas = document.getElementById('chart-gm');
+  if (!canvas) return;
+  if (gmChartInstance) { gmChartInstance.destroy(); gmChartInstance = null; }
+  gmChartInstance = new Chart(canvas, {
+    type: 'line',
+    data: { labels, datasets: [{ data: gms, borderColor:'#3B6D11', backgroundColor:'rgba(59,109,17,0.08)', borderWidth:2, pointRadius:chartData.length<=31?3:0, pointBackgroundColor:'#3B6D11', fill:true, tension:0.3 }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>ctx.parsed.y.toFixed(2)+'%'}} }, scales:{ x:{ticks:{font:{family:'Nunito',size:10},color:'#888780',maxRotation:45,autoSkip:true,maxTicksLimit:14},grid:{color:'#f0ede6',lineWidth:0.5}}, y:{ticks:{font:{family:'Nunito',size:10},color:'#888780',callback:v=>v.toFixed(1)+'%'},grid:{color:'#f0ede6',lineWidth:0.5}} } }
+  });
+}
+
+function renderRevCogsChart(chartData) {
+  if (!chartData || !chartData.length) return;
+  const labels = chartData.map(r => fmtGroupLabel(r.period, gran));
+  const revs   = chartData.map(r => Number(r.revenue)||0);
+  const cogss  = chartData.map(r => Number(r.cogs)||0);
+  const canvas = document.getElementById('chart-revcogs');
+  if (!canvas) return;
+  if (revCogsChartInstance) { revCogsChartInstance.destroy(); revCogsChartInstance = null; }
+  revCogsChartInstance = new Chart(canvas, {
+    type: 'bar',
+    data: { labels, datasets: [{ label:'Doanh thu', data:revs, backgroundColor:'rgba(168,216,120,0.85)', borderRadius:2 }, { label:'Giá vốn', data:cogss, backgroundColor:'rgba(180,180,180,0.7)', borderRadius:2 }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmtMoneyShort(ctx.parsed.y)}} }, scales:{ x:{ticks:{font:{family:'Nunito',size:10},color:'#888780',maxRotation:45,autoSkip:true,maxTicksLimit:14},grid:{display:false}}, y:{ticks:{font:{family:'Nunito',size:10},color:'#888780',callback:v=>fmtMoneyShort(v)},grid:{color:'#f0ede6',lineWidth:0.5}} } }
+  });
+}
+
+function fmtGroupLabel(key, granOverride) {
+  // Giờ dùng định dạng yyyy-mm cho tháng, yyyy cho năm, yyyy-mm-dd cho ngày
+  return String(key || '');
+}
+
+function fmtMoneyShort(v) {
+  if (v >= 1e9) return (v/1e9).toFixed(1) + 'B';
+  if (v >= 1e6) return (v/1e6).toFixed(0) + 'M';
+  if (v >= 1e3) return (v/1e3).toFixed(0) + 'K';
+  return v.toFixed(0);
+}
+
+function renderPlatformBars(orders, idT2c, idK2c, idTiktok) {
+  const platRev = { shopee_t2c: 0, shopee_k2c: 0, tiktok: 0 };
+  orders.forEach(r => { if (platRev[r.platform] !== undefined) platRev[r.platform] += Number(r.revenue) || 0; });
+  const maxRev = Math.max(...Object.values(platRev)) || 1;
+  // Add value labels
+  const platMap2 = { shopee_t2c: idT2c, shopee_k2c: idK2c, tiktok: idTiktok };
+  Object.entries(platMap2).forEach(([plat, id]) => {
+    const el = document.getElementById(id);
+    if (el) {
+      const pct = Math.round(platRev[plat] / maxRev * 85);
+      el.style.height = pct + '%';
+      el.title = fmtMoney(platRev[plat]);
+    }
+  });
+}
+
+function renderSkuTableFromRpc(rows) {
+  const master = {};
+  skuMasterCache.forEach(s => master[s.sku] = s);
+  const platMap = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop' };
+
+  skuTableAll = rows.map((r, i) => ({
+    rank: i + 1,
+    sku: r.sku,
+    product_name: r.product_name,
+    platform: r.platform,
+    large_category: r.large_category,
+    medium_category: r.medium_category,
+    qty: Number(r.qty) || 0,
+    rev: Number(r.revenue) || 0,
+    profit: Number(r.gross_profit) || 0,
+    gm: Number(r.gm_pct) || 0,
+  }));
+
+  document.getElementById('sku-table-body').innerHTML = skuTableAll.map(r => {
+    const m = master[r.sku] || {};
+    const lc = r.large_category || m.large_category;
+    const mc = r.medium_category || m.medium_category;
+    const cat = [lc, mc].filter(Boolean).join(' › ') || '—';
+    const platTag = r.platform
+      ? `<span class="plat-tag tag-${r.platform==='shopee_t2c'?'t2c':r.platform==='shopee_k2c'?'k2c':'tiktok'}">${platMap[r.platform]||r.platform}</span>`
+      : '<span style="color:var(--text3);">—</span>';
+    return `<tr>
+      <td style="color:var(--text3);">${r.rank}</td>
+      <td class="mono" style="font-size:11px;">${r.sku}</td>
+      <td>${r.product_name || m.product_name || '—'}</td>
+      <td style="color:var(--text3);font-size:12px;">${cat}</td>
+      <td>${platTag}</td>
+      <td class="right">${r.qty.toLocaleString('en-US')}</td>
+      <td class="right">${fmtMoney(r.rev)}</td>
+      <td class="right">${fmtMoney(r.cogs||0)}</td>
+      <td class="right">${fmtMoney(r.profit||0)}</td>
+      <td class="right"><span class="gm-badge ${r.gm>=30?'gm-high':r.gm>=15?'gm-mid':'gm-low'}">${r.gm.toFixed(1)}%</span></td>
+      <td class="right">${fmtMoney(r.qty > 0 ? Math.round(r.rev / r.qty) : 0)}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="11" class="empty">Không có dữ liệu</td></tr>';
+}
+
+// loadSkuTable replaced by buildSkuTableFromOrders (called from _loadOverviewNow)
+
+function renderSkuTable(rows) {
+  const master = {};
+  skuMasterCache.forEach(s => master[s.sku] = s);
+  const platMap = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop' };
+
+  document.getElementById('sku-table-body').innerHTML = rows.map(r => {
+    const m = master[r.sku] || {};
+    const lc = r.large_category || m.large_category;
+    const mc = r.medium_category || m.medium_category;
+    const cat = [lc, mc].filter(Boolean).join(' › ') || '—';
+    return `<tr>
+      <td style="color:var(--text3);">${r.rank}</td>
+      <td class="mono" style="font-size:11px;">${r.sku}</td>
+      <td>${r.product_name || m.product_name || '—'}</td>
+      <td style="color:var(--text3);font-size:12px;">${cat}</td>
+      <td>${r.platform ? `<span class="plat-tag tag-${r.platform === 'shopee_t2c' ? 't2c' : r.platform === 'shopee_k2c' ? 'k2c' : 'tiktok'}">${platMap[r.platform]||r.platform}</span>` : '<span style="color:var(--text3);font-size:11px;">—</span>'}</td>
+      <td class="right">${r.qty.toLocaleString('en-US')}</td>
+      <td class="right">${fmtMoney(r.rev)}</td>
+      <td class="right">${fmtMoney(r.cogs||0)}</td>
+      <td class="right">${fmtMoney(r.profit||0)}</td>
+      <td class="right"><span class="gm-badge ${r.gm>=30?'gm-high':r.gm>=15?'gm-mid':'gm-low'}">${r.gm.toFixed(1)}%</span></td>
+      <td class="right">${fmtMoney(r.qty > 0 ? Math.round(r.rev / r.qty) : 0)}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="11" class="empty">Không có dữ liệu</td></tr>';
+}
+
+function filterSkuTable(q) {
+  if (!q) { buildSkuTableFromOrders(getFilteredOrders()); return; }
+  const ql = q.toLowerCase().trim();
+  const exact   = skuTableAll.filter(r => r.sku.toLowerCase() === ql);
+  const prefix  = skuTableAll.filter(r => r.sku.toLowerCase().startsWith(ql) && r.sku.toLowerCase() !== ql);
+  const contain = skuTableAll.filter(r => r.sku.toLowerCase().includes(ql) && !r.sku.toLowerCase().startsWith(ql));
+  const filtered = [...exact, ...prefix, ...contain];
+  const master = {};
+  skuMasterCache.forEach(s => master[s.sku] = s);
+  const platMap = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop' };
+  document.getElementById('sku-table-body').innerHTML = filtered.map(r => {
+    const m   = master[r.sku] || {};
+    const cat = [m.large_category, m.medium_category].filter(Boolean).join(' › ') || '—';
+    const platTag = r.platform
+      ? `<span class="plat-tag tag-${r.platform==='shopee_t2c'?'t2c':r.platform==='shopee_k2c'?'k2c':'tiktok'}">${platMap[r.platform]||r.platform}</span>`
+      : '<span style="color:var(--text3);">—</span>';
+    return `<tr>
+      <td style="color:var(--text3);">${r.rank}</td>
+      <td class="mono" style="font-size:11px;">${r.sku}</td>
+      <td>${r.product_name || m.product_name || '—'}</td>
+      <td style="color:var(--text3);font-size:12px;">${cat}</td>
+      <td>${platTag}</td>
+      <td class="right">${r.qty.toLocaleString('en-US')}</td>
+      <td class="right">${fmtMoney(r.rev)}</td>
+      <td class="right">${fmtMoney(r.cogs||0)}</td>
+      <td class="right">${fmtMoney(r.profit)}</td>
+      <td class="right"><span class="gm-badge ${r.gm>=30?'gm-high':r.gm>=15?'gm-mid':'gm-low'}">${r.gm.toFixed(1)}%</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="11" class="empty">Không có dữ liệu</td></tr>';
+}
+
+// ============================================================
+// SKU MASTER
+// ============================================================
+async function loadSkuMaster() {
+  try {
+    skuMasterCache = await sbGet('sku_master', '?status=eq.active&order=sku');
+    loadCategoryFilters();
+  } catch(e) { console.error('SKU master load fail:', e); }
+}
+
+function loadCategoryFilters() {
+  const mediumCats = [...new Set(skuMasterCache.map(s => s.medium_category).filter(Boolean))].sort();
+  const sel = document.getElementById('medium-cat-filter');
+  if (sel) sel.innerHTML = '<option value="">Tất cả Medium Category</option>' +
+    mediumCats.map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+function filterMediumCat() {
+  const large = document.getElementById('large-cat-filter').value;
+  const mediums = [...new Set(
+    skuMasterCache.filter(s => !large || s.large_category === large).map(s => s.medium_category).filter(Boolean)
+  )].sort();
+  document.getElementById('medium-cat-filter').innerHTML =
+    '<option value="">Tất cả Medium Category</option>' +
+    mediums.map(c => `<option value="${c}">${c}</option>`).join('');
+  loadCategoryData();
+}
+
+// ============================================================
+// SALES TAB
+// ============================================================
+let salesView = 'sku';
+function setSalesView(v) {
+  salesView = v;
+  document.querySelectorAll('.section-tab').forEach((t,i) => t.classList.toggle('active', ['sku','category','platform'][i] === v));
+  ['sales-sku','sales-category','sales-platform'].forEach((id,i) => {
+    document.getElementById(id).style.display = ['sku','category','platform'][i] === v ? '' : 'none';
+  });
+  if (v === 'sku') loadSalesSku();
+  if (v === 'category') loadCategoryData();
+  if (v === 'platform') loadPlatformData();
+}
+
+async function loadSalesSku() {
+  if (!_allOrdersLoaded) return;
+  const orders = getFilteredOrders();
+  const bySku = {};
+  orders.forEach(r => {
+    if (!bySku[r.sku]) bySku[r.sku] = { sku: r.sku, product_name: r.product_name, qty: 0, rev: 0, profit: 0 };
+    bySku[r.sku].qty    += Number(r.qty) || 0;
+    bySku[r.sku].rev    += Number(r.revenue) || 0;
+    bySku[r.sku].profit += Number(r.gross_profit) || 0;
+  });
+  salesSkuAll = Object.values(bySku).sort((a,b) => b.qty - a.qty).map((r,i) => ({ rank: i+1, ...r, gm: r.rev>0?r.profit/r.rev*100:0 }));
+  renderSalesSkuTable(salesSkuAll);
+  renderHeatmap();
+}
+
+// ---- HEATMAP ----
+function renderHeatmap() {
+  if (!_allOrdersLoaded) return;
+  const orders   = getFilteredOrders();
+  const topN     = parseInt(document.getElementById('heatmap-top-n')?.value || 20);
+
+  // Tính top N SKU theo SL bán tổng
+  const bySku = {};
+  orders.forEach(r => {
+    if (!bySku[r.sku]) bySku[r.sku] = { sku: r.sku, qty: 0 };
+    bySku[r.sku].qty += Number(r.qty) || 0;
+  });
+  const topSkus = Object.values(bySku).sort((a,b) => b.qty - a.qty).slice(0, topN).map(s => s.sku);
+
+  // Lấy tất cả periods
+  const periodSet = new Set();
+  orders.forEach(r => {
+    const d = String(r.order_date || '');
+    const p = gran === 'year' ? d.slice(0,4) : gran === 'month' ? d.slice(0,7) : d.slice(0,10);
+    if (p) periodSet.add(p);
+  });
+  const periods = [...periodSet].sort();
+
+  // Build matrix: sku -> period -> qty
+  const matrix = {};
+  topSkus.forEach(sku => { matrix[sku] = {}; periods.forEach(p => { matrix[sku][p] = 0; }); });
+  orders.forEach(r => {
+    if (!matrix[r.sku]) return;
+    const d = String(r.order_date || '');
+    const p = gran === 'year' ? d.slice(0,4) : gran === 'month' ? d.slice(0,7) : d.slice(0,10);
+    if (p) matrix[r.sku][p] = (matrix[r.sku][p] || 0) + (Number(r.qty) || 0);
+  });
+
+  // Max value cho color scale
+  const allVals = topSkus.flatMap(sku => periods.map(p => matrix[sku][p] || 0));
+  const maxVal  = Math.max(...allVals, 1);
+
+  // Color scale: 0 = #f3f0ea, max = #3B6D11
+  function heatColor(val) {
+    if (val === 0) return { bg: '#f3f0ea', fg: '#888780' };
+    const t   = Math.pow(val / maxVal, 0.5); // sqrt để màu trải đều hơn
+    const r   = Math.round(243 - t * (243 - 59));
+    const g   = Math.round(240 - t * (240 - 109));
+    const b   = Math.round(234 - t * (234 - 17));
+    const fg  = t > 0.55 ? '#ffffff' : '#2c2c2a';
+    return { bg: `rgb(${r},${g},${b})`, fg };
+  }
+
+  // Totals per period
+  const periodTotals = {};
+  periods.forEach(p => { periodTotals[p] = topSkus.reduce((s,sku) => s + (matrix[sku][p]||0), 0); });
+
+  // Render
+  const colHeaders = periods.map(p => `<th>${fmtGroupLabel(p, gran)}</th>`).join('');
+  const rows = topSkus.map(sku => {
+    const total = periods.reduce((s,p) => s + (matrix[sku][p]||0), 0);
+    const cells = periods.map(p => {
+      const v = matrix[sku][p] || 0;
+      const { bg, fg } = heatColor(v);
+      const label = v >= 1000 ? (v/1000).toFixed(1)+'k' : v > 0 ? v.toLocaleString('en-US') : '';
+      return `<td class="heatmap-cell" style="background:${bg};color:${fg};" title="${sku} | ${fmtGroupLabel(p,gran)}: ${v.toLocaleString('en-US')}">${label}</td>`;
+    }).join('');
+    return `<tr>
+      <td class="sku-label">${sku}</td>
+      ${cells}
+      <td class="heatmap-total">${total.toLocaleString('en-US')}</td>
+    </tr>`;
+  }).join('');
+
+  const totalRow = `<tr style="border-top:1px solid var(--border);">
+    <td class="sku-label" style="font-weight:600;color:var(--text3);font-size:10px;letter-spacing:0.04em;">TỔNG</td>
+    ${periods.map(p => { const v = periodTotals[p]; const { bg, fg } = heatColor(v * topN / (topSkus.length || 1)); const label = v >= 1000 ? (v/1000).toFixed(1)+'k' : v.toLocaleString('en-US'); return `<td class="heatmap-cell" style="background:${bg};color:${fg};font-weight:600;">${label}</td>`; }).join('')}
+    <td class="heatmap-total" style="font-weight:700;">${topSkus.reduce((s,sku) => s + periods.reduce((ss,p) => ss + (matrix[sku][p]||0), 0), 0).toLocaleString('en-US')}</td>
+  </tr>`;
+
+  document.getElementById('heatmap-wrap').innerHTML = `
+    <table class="heatmap-table">
+      <thead><tr>
+        <th class="sku-col">SKU</th>
+        ${colHeaders}
+        <th style="text-align:right;padding-right:8px;">Tổng</th>
+      </tr></thead>
+      <tbody>${rows}${totalRow}</tbody>
+    </table>`;
+
+  // Legend
+  const legend = document.getElementById('heatmap-legend');
+  if (legend) {
+    legend.innerHTML = [0, 0.2, 0.4, 0.6, 0.8, 1].map(t => {
+      const v = Math.round(t * maxVal);
+      const { bg } = heatColor(v);
+      return `<div style="width:20px;height:12px;background:${bg};border-radius:2px;" title="${v}"></div>`;
+    }).join('');
+  }
+}
+
+function renderSalesSkuTable(rows) {
+  const master = {};
+  skuMasterCache.forEach(s => master[s.sku] = s);
+  document.getElementById('sales-sku-body').innerHTML = rows.map(r => {
+    const m = master[r.sku] || {};
+    const cat = [m.large_category, m.medium_category].filter(Boolean).join(' › ') || '—';
+    return `<tr>
+      <td style="color:var(--text3);">${r.rank}</td>
+      <td class="mono" style="font-size:11px;">${r.sku}</td>
+      <td>${r.product_name || m.product_name || '—'}</td>
+      <td style="color:var(--text3);font-size:11px;">${cat}</td>
+      <td class="right" style="font-weight:500;">${r.qty.toLocaleString('en-US')}</td>
+      <td class="right">${fmtMoney(r.rev)}</td>
+      <td class="right"><span class="gm-badge ${r.gm>=30?'gm-high':r.gm>=15?'gm-mid':'gm-low'}">${r.gm.toFixed(1)}%</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>';
+  makeSortable('tbl-sales-sku');
+}
+
+function filterSalesSkuTable(q) {
+  if (!q) { renderSalesSkuTable(salesSkuAll); return; }
+  const ql = q.toLowerCase().trim();
+  const exact   = salesSkuAll.filter(r => r.sku.toLowerCase() === ql);
+  const prefix  = salesSkuAll.filter(r => r.sku.toLowerCase().startsWith(ql) && r.sku.toLowerCase() !== ql);
+  const contain = salesSkuAll.filter(r => r.sku.toLowerCase().includes(ql) && !r.sku.toLowerCase().startsWith(ql));
+  renderSalesSkuTable([...exact, ...prefix, ...contain]);
+}
+
+async function loadCategoryData() {
+  if (!_allOrdersLoaded) return;
+  const orders = getFilteredOrders();
+  const medium = document.getElementById('medium-cat-filter')?.value || '';
+  const master = {};
+  skuMasterCache.forEach(s => master[s.sku] = s);
+
+  const byCat = {};
+  orders.forEach(r => {
+    const m = master[r.sku] || {};
+    if (medium && m.medium_category !== medium) return;
+    const lc = m.large_category  || 'Chưa phân loại';
+    const mc = m.medium_category || '(Chưa phân loại)';
+    if (!byCat[mc]) byCat[mc] = { large: lc, medium: mc, qty: 0, rev: 0, profit: 0, byMonth: {} };
+    byCat[mc].qty    += Number(r.qty) || 0;
+    byCat[mc].rev    += Number(r.revenue) || 0;
+    byCat[mc].profit += Number(r.gross_profit) || 0;
+    const mo = String(r.order_date||'').slice(0,7);
+    if (mo) byCat[mc].byMonth[mo] = (byCat[mc].byMonth[mo]||0) + (Number(r.qty)||0);
+  });
+
+  const rows = Object.values(byCat).sort((a,b) => b.qty - a.qty);
+
+  // Bảng với peak month
+  document.getElementById('cat-table-body').innerHTML = rows.map((r,i) => {
+    const gm = r.rev > 0 ? r.profit/r.rev*100 : 0;
+    const peak = Object.entries(r.byMonth).sort((a,b)=>b[1]-a[1])[0];
+    const peakLabel = peak ? `${peak[0]} (${peak[1].toLocaleString('en-US')})` : '—';
+    return `<tr>
+      <td style="color:var(--text3);">${i+1}</td>
+      <td style="font-weight:500;">${r.medium}</td>
+      <td style="color:var(--text3);">${r.large}</td>
+      <td class="right" style="font-weight:500;">${r.qty.toLocaleString('en-US')}</td>
+      <td class="right">${fmtMoney(r.rev)}</td>
+      <td class="right"><span class="gm-badge ${gm>=30?'gm-high':gm>=15?'gm-mid':'gm-low'}">${gm.toFixed(1)}%</span></td>
+      <td class="right" style="color:var(--text3);font-size:11px;">${peakLabel}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>';
+  makeSortable('tbl-cat-sales');
+
+  // Chart: sort descending rồi reverse để top 1 ở trên cùng
+  const sorted = [...rows].sort((a,b) => b.qty - a.qty).reverse();
+  _destroyChart('catQtyChart');
+  window.catQtyChart = _makeHorizBar('chart-cat-qty',
+    sorted.map(r => r.medium), sorted.map(r => r.qty),
+    [], sorted.map(r => r.rev>0?r.profit/r.rev*100:0), true
+  );
+}
+
+async function loadPlatformData() {
+  if (!_allOrdersLoaded) return;
+  const orders = getFilteredOrders();
+  const platMap    = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop' };
+  const platColors = { shopee_t2c: '#3B6D11', shopee_k2c: '#639922', tiktok: '#c0dd97' };
+
+  const byPlat = {};
+  const periodSet = new Set();
+  orders.forEach(r => {
+    const p = r.platform || 'other';
+    const d = String(r.order_date||'');
+    const period = gran==='year'?d.slice(0,4):gran==='month'?d.slice(0,7):d.slice(0,10);
+    if (!byPlat[p]) byPlat[p] = { platform: p, qty: 0, rev: 0, profit: 0, orders: new Set(), byPeriod: {} };
+    byPlat[p].qty    += Number(r.qty)||0;
+    byPlat[p].rev    += Number(r.revenue)||0;
+    byPlat[p].profit += Number(r.gross_profit)||0;
+    byPlat[p].orders.add(r.order_id);
+    if (period) { byPlat[p].byPeriod[period] = (byPlat[p].byPeriod[period]||0)+(Number(r.qty)||0); periodSet.add(period); }
+  });
+
+  const plats = Object.keys(byPlat);
+  const periods = [...periodSet].sort();
+  const labels = periods.map(p => fmtGroupLabel(p, gran));
+  const totalQty = plats.reduce((s,p) => s + byPlat[p].qty, 0);
+
+  // Bảng
+  document.getElementById('plat-table-body').innerHTML = [...plats].sort((a,b)=>byPlat[b].qty-byPlat[a].qty).map(p => {
+    const r = byPlat[p];
+    const gm = r.rev > 0 ? r.profit/r.rev*100 : 0;
+    return `<tr>
+      <td><span class="plat-tag tag-${p==='shopee_t2c'?'t2c':p==='shopee_k2c'?'k2c':'tiktok'}">${platMap[p]||p}</span></td>
+      <td class="right" style="font-weight:500;">${r.qty.toLocaleString('en-US')}</td>
+      <td class="right">${fmtMoney(r.rev)}</td>
+      <td class="right"><span class="gm-badge ${gm>=30?'gm-high':gm>=15?'gm-mid':'gm-low'}">${gm.toFixed(1)}%</span></td>
+      <td class="right">${r.orders.size.toLocaleString('en-US')}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5" class="empty">Không có dữ liệu</td></tr>';
+
+  // Chart trend SL bán
+  _destroyChart('platTrendChart');
+  window.platTrendChart = _makeChart('chart-plat-trend', 'line', labels,
+    plats.map(p => ({
+      label: platMap[p]||p,
+      data: periods.map(period => byPlat[p].byPeriod[period]||0),
+      borderColor: platColors[p]||'#888',
+      backgroundColor: (platColors[p]||'#888')+'22',
+      borderWidth: 2, tension: 0.3,
+      pointRadius: periods.length<=31?3:0, fill: false,
+    })),
+    { yFmt: v => v.toLocaleString('en-US'), tooltipFmt: v => v.toLocaleString('en-US') }
+  );
+
+  // Doughnut tỷ trọng SL bán
+  _destroyChart('platShareChart');
+  const shareCanvas = document.getElementById('chart-plat-share');
+  if (shareCanvas) {
+    window.platShareChart = new Chart(shareCanvas, {
+      type: 'doughnut',
+      data: {
+        labels: plats.map(p => platMap[p]||p),
+        datasets: [{ data: plats.map(p => byPlat[p].qty), backgroundColor: plats.map(p => platColors[p]||'#888'), borderWidth: 2 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { font: { family:'Nunito',size:11 }, padding:10, boxWidth:12 } },
+          tooltip: { callbacks: { label: ctx => {
+            const pct = totalQty>0?(ctx.parsed/totalQty*100).toFixed(1):0;
+            return `${ctx.label}: ${ctx.parsed.toLocaleString('en-US')} (${pct}%)`;
+          }}}
+        }
+      }
+    });
+  }
+}
+
+// ============================================================
+// GIÁ VỐN
+// ============================================================
+let costMode = 'manual';
+function setCostMode(m) {
+  costMode = m;
+  document.getElementById('cost-manual').style.display  = m === 'manual' ? '' : 'none';
+  document.getElementById('cost-upload').style.display  = m === 'upload' ? '' : 'none';
+  document.getElementById('cost-mode-manual').style.cssText = m==='manual' ? 'background:var(--green-bg);color:var(--green);border-color:var(--green3);' : '';
+  document.getElementById('cost-mode-upload').style.cssText = m==='upload' ? 'background:var(--green-bg);color:var(--green);border-color:var(--green3);' : '';
+}
+
+function searchSku(q) {
+  const dropdown = document.getElementById('sku-dropdown');
+  if (!q || q.length < 1) { dropdown.classList.remove('show'); return; }
+  const results = skuMasterCache.filter(s =>
+    s.sku.toLowerCase().includes(q.toLowerCase()) ||
+    (s.product_name||'').toLowerCase().includes(q.toLowerCase())
+  ).slice(0, 10);
+
+  if (!results.length) { dropdown.classList.remove('show'); return; }
+  dropdown.innerHTML = results.map(s => `
+    <div class="sku-option" onclick="selectSkuForCost('${s.sku}')">
+      <div class="sku-option-name">${s.sku} — ${s.product_name || ''}</div>
+      <div class="sku-option-cat">${[s.large_category, s.medium_category, s.small_category].filter(Boolean).join(' › ')}</div>
+    </div>
+  `).join('');
+  dropdown.classList.add('show');
+}
+
+async function selectSkuForCost(sku) {
+  selectedSku = skuMasterCache.find(s => s.sku === sku);
+  document.getElementById('cost-sku-search').value = sku;
+  document.getElementById('sku-dropdown').classList.remove('show');
+
+  // Show info
+  const info = document.getElementById('cost-sku-info');
+  info.style.display = '';
+  document.getElementById('cost-sku-name').textContent = selectedSku.product_name || sku;
+  document.getElementById('cost-sku-cat').textContent  = [selectedSku.large_category, selectedSku.medium_category, selectedSku.small_category].filter(Boolean).join(' › ');
+
+  // Load latest cost
+  try {
+    const costs = await sbGet('sku_cost', `?sku=eq.${encodeURIComponent(sku)}&order=effective_date.desc&limit=1`);
+    const latest = costs[0];
+    document.getElementById('cost-sku-current').textContent = latest
+      ? `Giá hiện tại: ${fmtNum(latest.cost)} (từ ${latest.effective_date})`
+      : 'Chưa có giá vốn';
+  } catch(e) {}
+}
+
+async function saveCost() {
+  if (!selectedSku) { showToast('Chọn SKU trước', 'error'); return; }
+  const date = document.getElementById('cost-date').value;
+  const val  = parseFloat(document.getElementById('cost-value').value);
+  const note = document.getElementById('cost-note').value.trim();
+
+  if (!date) { showToast('Chọn ngày hiệu lực', 'error'); return; }
+  if (!val || val <= 0) { showToast('Nhập giá vốn hợp lệ', 'error'); return; }
+
+  try {
+    await sbUpsert('sku_cost', { sku: selectedSku.sku, effective_date: date, cost: val, note: note || null });
+    showToast('Đã lưu giá vốn!', 'success');
+    loadCostHistory();
+    // Reset
+    document.getElementById('cost-sku-search').value = '';
+    document.getElementById('cost-value').value = '';
+    document.getElementById('cost-note').value = '';
+    document.getElementById('cost-sku-info').style.display = 'none';
+    selectedSku = null;
+  } catch(e) { showToast('Lỗi: ' + e.message, 'error'); }
+}
+
+async function loadCostHistory() {
+  try {
+    const costs = await sbGet('sku_cost', '?order=effective_date.desc');
+    console.log('sku_cost loaded:', costs.length, 'rows');
+    costHistoryAll = costs;
+    renderCostHistory(costs);
+    updateCostCounter();
+  } catch(e) { console.error('loadCostHistory error:', e); }
+}
+
+function updateCostCounter() {
+  const totalSkus = skuMasterCache.length;
+  const skusWithCost = new Set(costHistoryAll.map(c => c.sku)).size;
+  const missing = Math.max(0, totalSkus - skusWithCost);
+  const hasEl = document.getElementById('cost-counter-has');
+  const missEl = document.getElementById('cost-counter-missing');
+  if (hasEl) hasEl.textContent = `${skusWithCost.toLocaleString('en-US')} SKU đã có giá vốn`;
+  if (missEl) missEl.textContent = `${missing.toLocaleString('en-US')} chưa có`;
+}
+
+function setCostView(v) {
+  ['update','trend','category'].forEach(mode => {
+    const el = document.getElementById('cost-view-' + mode);
+    if (el) el.style.display = mode === v ? '' : 'none';
+  });
+  document.querySelectorAll('#panel-cost .ovr-chart-tab').forEach((b,i) =>
+    b.classList.toggle('active', ['update','trend','category'][i] === v));
+  if (v === 'trend') renderCostHeatmap(null);
+  if (v === 'category') renderCostByCategory();
+}
+
+// ---- TREND: Top SKU (horizontal bar - giá vốn hiện hành) ----
+// ---- COST HEATMAP ----
+function renderCostHeatmap(filteredSkus) {
+  const n = parseInt(document.getElementById('trend-top-n')?.value || 20);
+  const bySku = {};
+  costHistoryAll.forEach(r => {
+    if (!bySku[r.sku]) bySku[r.sku] = [];
+    bySku[r.sku].push({ date: r.effective_date, cost: r.cost, note: r.note });
+  });
+  Object.values(bySku).forEach(arr => arr.sort((a,b) => a.date.localeCompare(b.date)));
+
+  let skus;
+  if (filteredSkus && filteredSkus.length > 0) {
+    skus = filteredSkus.filter(s => bySku[s]);
+    if (!skus.length) skus = filteredSkus.slice(0, n); // show even without history
+  } else {
+    skus = Object.entries(bySku).sort((a,b) => b[1].length - a[1].length).slice(0, n).map(e => e[0]);
+  }
+
+  if (!skus.length) {
+    document.getElementById('cost-heatmap-wrap').innerHTML = '<div style="padding:20px;color:var(--text3);text-align:center;">Không có dữ liệu giá vốn</div>';
+    return;
+  }
+
+  const dateSet = new Set();
+  skus.forEach(sku => bySku[sku]?.forEach(r => dateSet.add(r.date)));
+  const dates = [...dateSet].sort();
+
+  const lookup = {};
+  skus.forEach(sku => {
+    lookup[sku] = {};
+    bySku[sku]?.forEach(r => { lookup[sku][r.date] = r; });
+  });
+
+  function costColor(cost, min, max) {
+    if (!cost) return { bg: '#f3f0ea', fg: '#aaa' };
+    const t = max > min ? (cost - min) / (max - min) : 0.5;
+    const r = Math.round(235 + t * (180 - 235));
+    const g = Math.round(245 + t * (60  - 245));
+    const b = Math.round(255 + t * (60  - 255));
+    return { bg: `rgb(${r},${g},${b})`, fg: t > 0.6 ? '#fff' : '#2c2c2a' };
+  }
+
+  const colHeaders = dates.map(d => `<th style="font-size:10px;color:var(--text3);padding:4px 6px;white-space:nowrap;text-align:center;">${d}</th>`).join('');
+
+  const rows = skus.map(sku => {
+    const history = bySku[sku] || [];
+    const costs = history.map(r => r.cost).filter(Boolean);
+    const min = costs.length ? Math.min(...costs) : 0;
+    const max = costs.length ? Math.max(...costs) : 0;
+
+    const cells = dates.map(d => {
+      const entry = lookup[sku]?.[d];
+      if (!entry) return `<td style="background:#f8f6f2;border:0.5px solid var(--bg);min-width:60px;"></td>`;
+      const idx = history.findIndex(r => r.date === d);
+      const prev = idx > 0 ? history[idx-1].cost : null;
+      const { bg, fg } = costColor(entry.cost, min, max);
+      const pct = prev && prev > 0 ? ((entry.cost - prev) / prev * 100) : null;
+      const pctStr = pct !== null ? (pct > 0 ? `↑${pct.toFixed(1)}%` : `↓${Math.abs(pct).toFixed(1)}%`) : '';
+      const label = entry.cost >= 1e6 ? (entry.cost/1e6).toFixed(1)+'M' : entry.cost >= 1e3 ? Math.round(entry.cost/1e3)+'k' : entry.cost;
+      const title = `${sku} | ${d}: ${fmtNum(entry.cost)}${pctStr?' ('+pctStr+')':''}${entry.note?' — '+entry.note:''}`;
+      return `<td class="heatmap-cell" style="background:${bg};color:${fg};font-size:10px;cursor:pointer;min-width:60px;"
+        title="${title}" onclick="selectTrendSku('${sku}')">${label}${pctStr?`<br><span style='font-size:9px;opacity:0.85;'>${pctStr}</span>`:''}`;
+    }).join('');
+
+    const first = history[0]?.cost, latest = history[history.length-1]?.cost;
+    const totalPct = first && latest && first !== latest ? ((latest-first)/first*100) : null;
+    const tpStr = totalPct !== null
+      ? `<span style="font-size:10px;color:${totalPct>0?'var(--red)':'var(--green)'};">${totalPct>0?'↑':'↓'}${Math.abs(totalPct).toFixed(0)}%</span>` : '—';
+
+    return `<tr>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;padding:3px 8px 3px 0;white-space:nowrap;position:sticky;left:0;background:var(--bg3);border-right:0.5px solid var(--border);cursor:pointer;" onclick="selectTrendSku('${sku}')">${sku}</td>
+      ${cells}
+      <td style="padding:3px 8px;font-size:11px;text-align:right;border-left:0.5px solid var(--border);">${tpStr}</td>
+    </tr>`;
+  }).join('');
+
+  const legend = document.getElementById('cost-heatmap-legend');
+  if (legend) legend.innerHTML = [0,0.25,0.5,0.75,1].map(t => {
+    const r2=Math.round(235+t*(180-235)), g2=Math.round(245+t*(60-245)), b2=Math.round(255+t*(60-255));
+    return `<div style="width:18px;height:12px;background:rgb(${r2},${g2},${b2});border-radius:2px;"></div>`;
+  }).join('');
+
+  document.getElementById('cost-heatmap-wrap').innerHTML = `
+    <table class="heatmap-table" style="border-collapse:collapse;">
+      <thead><tr>
+        <th style="position:sticky;left:0;background:var(--bg);z-index:2;font-size:10px;color:var(--text3);padding:4px 8px 4px 0;text-align:left;">SKU</th>
+        ${colHeaders}
+        <th style="font-size:10px;color:var(--text3);padding:4px 8px;text-align:right;">Tổng±</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+
+  document.getElementById('trend-chart-title').textContent =
+    filteredSkus ? `Heatmap giá vốn — ${skus.length} SKU` : `Heatmap giá vốn — Top ${n} SKU`;
+}
+
+function renderTopSkuTrend() { renderCostHeatmap(null); }
+
+function clearTrendSku() {
+  document.getElementById('trend-sku-input').value = '';
+  document.getElementById('cost-trend-detail').style.display = 'none';
+  renderCostHeatmap(null);
+}
+
+function searchTrendSku(q) {
+  const dd = document.getElementById('trend-sku-dropdown');
+  if (!q) { dd.style.display = 'none'; return; }
+  const ql = q.toLowerCase();
+  const matches = skuMasterCache.filter(s =>
+    s.sku.toLowerCase().includes(ql) || (s.product_name||'').toLowerCase().includes(ql)
+  ).slice(0, 10);
+  if (!matches.length) { dd.style.display = 'none'; return; }
+  dd.style.display = 'block';
+  dd.innerHTML = matches.map(s => `
+    <div class="sku-search-item" onclick="selectTrendSku('${s.sku}')">
+      <span class="mono" style="font-size:11px;">${s.sku}</span>
+      <span style="color:var(--text3);font-size:11px;margin-left:8px;">${s.product_name||''}</span>
+    </div>`).join('');
+}
+
+function applyTrendSearch() {
+  const q = document.getElementById('trend-sku-input').value.trim();
+  document.getElementById('trend-sku-dropdown').style.display = 'none';
+  if (!q) { renderCostHeatmap(null); return; }
+  const ql = q.toLowerCase();
+  let skuMatches = skuMasterCache.filter(s => s.sku.toLowerCase().startsWith(ql)).map(s => s.sku);
+  if (!skuMatches.length) skuMatches = skuMasterCache.filter(s => s.sku.toLowerCase().includes(ql)).map(s => s.sku);
+  renderCostHeatmap(skuMatches.length ? skuMatches : null);
+}
+
+function selectTrendSku(sku) {
+  document.getElementById('trend-sku-input').value = sku;
+  document.getElementById('trend-sku-dropdown').style.display = 'none';
+  renderCostHeatmap([sku]);
+  const rows = costHistoryAll.filter(r => r.sku === sku)
+    .sort((a,b) => b.effective_date.localeCompare(a.effective_date));
+  const detail = document.getElementById('cost-trend-detail');
+  document.getElementById('trend-table-title').textContent = 'Lịch sử: ' + sku;
+  detail.style.display = '';
+  document.getElementById('trend-history-body').innerHTML = rows.map((r,i,arr) => {
+    const prev = arr[i+1];
+    const pct = prev && prev.cost > 0 ? (r.cost - prev.cost) / prev.cost * 100 : null;
+    const pctStr = pct !== null
+      ? `<span style="color:${pct>0?'var(--green)':pct<0?'var(--red)':'var(--text3)'};font-weight:600;">${pct>0?'↑':'↓'} ${Math.abs(pct).toFixed(1)}%</span>`
+      : '<span style="color:var(--text3);">—</span>';
+    return `<tr>
+      <td>${r.effective_date}</td>
+      <td class="right" style="font-weight:500;">${fmtNum(r.cost)}</td>
+      <td class="right">${pctStr}</td>
+      <td style="color:var(--text3);">${r.note||'—'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="4" class="empty">Chưa có dữ liệu</td></tr>';
+  detail.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+// ---- CATEGORY cost overview ----
+function renderCostByCategory() {
+  const latestCost = {};
+  [...costHistoryAll].sort((a,b) => a.effective_date.localeCompare(b.effective_date))
+    .forEach(r => { latestCost[r.sku] = r.cost; });
+  const byCat = {};
+  skuMasterCache.forEach(s => {
+    const med = s.medium_category || '(Chưa phân loại)';
+    const lrg = s.large_category  || '—';
+    if (!byCat[med]) byCat[med] = { med, lrg, skus: [], costs: [] };
+    byCat[med].skus.push(s.sku);
+    if (latestCost[s.sku]) byCat[med].costs.push(latestCost[s.sku]);
+  });
+  const rows = Object.values(byCat).sort((a,b) => b.costs.length - a.costs.length);
+  document.getElementById('cost-cat-body').innerHTML = rows.map(r => {
+    const n = r.costs.length, total = r.skus.length;
+    const avg = n > 0 ? r.costs.reduce((s,v)=>s+v,0)/n : 0;
+    const min = n > 0 ? Math.min(...r.costs) : 0;
+    const max = n > 0 ? Math.max(...r.costs) : 0;
+    const pct = total > 0 ? n/total*100 : 0;
+    const pctColor = pct>=80?'var(--green)':pct>=50?'var(--amber)':'var(--red)';
+    return `<tr>
+      <td style="font-weight:500;">${r.med}</td>
+      <td style="color:var(--text3);">${r.lrg}</td>
+      <td class="right">${n.toLocaleString('en-US')}</td>
+      <td class="right">${total.toLocaleString('en-US')}</td>
+      <td class="right" style="font-weight:500;">${n>0?fmtNum(Math.round(avg)):'—'}</td>
+      <td class="right" style="color:var(--text3);">${n>0?fmtNum(min):'—'}</td>
+      <td class="right" style="color:var(--text3);">${n>0?fmtNum(max):'—'}</td>
+      <td class="right"><span style="color:${pctColor};font-weight:600;">${pct.toFixed(0)}%</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" class="empty">Chưa có dữ liệu</td></tr>';
+}
+
+function renderCostHistory(costs) {
+  const master = {};
+  skuMasterCache.forEach(s => master[s.sku] = s);
+  document.getElementById('cost-history-body').innerHTML = costs.slice(0,100).map(r => {
+    const m = master[r.sku] || {};
+    const cat = [m.large_category, m.medium_category].filter(Boolean).join(' › ') || '—';
+    return `<tr>
+      <td class="mono" style="font-size:11px;">${r.sku}</td>
+      <td>${m.product_name || '—'}</td>
+      <td style="color:var(--text3);font-size:11px;">${cat}</td>
+      <td class="right">${r.effective_date}</td>
+      <td class="right" style="font-weight:500;">${fmtNum(r.cost)}</td>
+      <td style="color:var(--text3);">${r.note || '—'}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="deleteCost(${r.id})">✕</button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" class="empty">Chưa có giá vốn</td></tr>';
+}
+
+function filterCostHistory(q) {
+  const filtered = q ? costHistoryAll.filter(r => r.sku.toLowerCase().includes(q.toLowerCase())) : costHistoryAll;
+  renderCostHistory(filtered);
+}
+
+async function deleteCost(id) {
+  if (!confirm('Xóa giá vốn này?')) return;
+  try {
+    await sbDelete('sku_cost', `id=eq.${id}`);
+    showToast('Đã xóa', 'success');
+    loadCostHistory();
+  } catch(e) { showToast('Lỗi: ' + e.message, 'error'); }
+}
+
+// Upload
+function handleDrag(e, over) { e.preventDefault(); document.getElementById('upload-zone').classList.toggle('drag', over); }
+function handleDrop(e) { e.preventDefault(); handleCostFile({ files: e.dataTransfer.files }); }
+function handleCostFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  showToast('Đọc file...', 'success');
+  // Simple preview — in real impl would parse Excel
+  document.getElementById('cost-preview').style.display = '';
+  document.getElementById('cost-preview-info').textContent = `File: ${file.name}`;
+}
+function cancelCostUpload() { document.getElementById('cost-preview').style.display = 'none'; }
+async function uploadCostData() { showToast('Tính năng đang phát triển', 'error'); }
+
+// ============================================================
+// SKU MAPPING
+// ============================================================
+// Khởi tạo danh sách large/medium cat từ skuMasterCache cho datalist
+function buildCatDatalist() {
+  const largeCats = [...new Set(skuMasterCache.map(s => s.large_category).filter(Boolean))].sort();
+  const mediumCats = [...new Set(skuMasterCache.map(s => s.medium_category).filter(Boolean))].sort();
+  // Remove old if exists
+  ['dl-large-cat','dl-medium-cat'].forEach(id => document.getElementById(id)?.remove());
+  const dlLarge = document.createElement('datalist'); dlLarge.id = 'dl-large-cat';
+  largeCats.forEach(c => { const o = document.createElement('option'); o.value = c; dlLarge.appendChild(o); });
+  const dlMedium = document.createElement('datalist'); dlMedium.id = 'dl-medium-cat';
+  mediumCats.forEach(c => { const o = document.createElement('option'); o.value = c; dlMedium.appendChild(o); });
+  document.body.appendChild(dlLarge);
+  document.body.appendChild(dlMedium);
+}
+
+async function loadMapping() { return loadMappingAndUncat(); }
+
+async function loadMappingAndUncat() {
+  try {
+    // 1. SKU chưa mapping (typo/không tìm thấy)
+    const unmatched = await sbGet('sku_mapping', '?matched=eq.false&order=created_at.desc');
+    // 2. SKU valid nhưng chưa có category trong sku_master
+    const uncatSkus = _allOrders
+      ? [...new Set(_allOrders.map(r => r.sku).filter(Boolean))].filter(sku => {
+          const m = skuMasterCache.find(s => s.sku === sku);
+          return !m || (!m.large_category && !m.medium_category);
+        })
+      : [];
+
+    const matched = await sbGet('sku_mapping', '?matched=eq.true&order=created_at.desc');
+    renderUnmatched(unmatched, uncatSkus);
+    renderMatched(matched);
+  } catch(e) { console.error(e); }
+}
+
+let _lastUnmatchedRows = [];
+let _lastUncatSkus = [];
+function filterMappingTable(q) {
+  if (!q) { renderUnmatched(_lastUnmatchedRows, _lastUncatSkus); return; }
+  const ql = q.toLowerCase().trim();
+  renderUnmatched(
+    _lastUnmatchedRows.filter(r => (r.sku_raw||'').toLowerCase().includes(ql)),
+    _lastUncatSkus.filter(s => s.toLowerCase().includes(ql))
+  );
+}
+
+function renderUnmatched(unmatchedRows, uncatSkus = []) {
+  _lastUnmatchedRows = unmatchedRows;
+  _lastUncatSkus = uncatSkus;
+  buildCatDatalist();
+  const master = {};
+  skuMasterCache.forEach(s => master[s.sku] = s);
+
+  // Rows từ sku_mapping (typo)
+  const mappingRows = unmatchedRows.map(r => `<tr>
+    <td class="mono" style="font-size:12px;">${r.sku_raw}</td>
+    <td style="color:var(--text3);">—</td>
+    <td><input type="text" value="${r.sku_adjusted||''}" placeholder="Nhập SKU đúng..." id="adj-${r.sku_raw}" style="width:140px;"></td>
+    <td><input type="text" placeholder="Large category..." id="lcat-${r.sku_raw}" list="dl-large-cat" style="width:150px;" value="${master[r.sku_adjusted||'']?.large_category||''}"></td>
+    <td><input type="text" placeholder="Medium category..." id="mcat-${r.sku_raw}" list="dl-medium-cat" style="width:150px;" value="${master[r.sku_adjusted||'']?.medium_category||''}"></td>
+    <td><span class="status-badge tag-unmatched">SKU lỗi</span></td>
+    <td><button class="btn btn-sm btn-primary" onclick="confirmMapping('${r.sku_raw}', false)">Lưu</button></td>
+  </tr>`);
+
+  // Rows từ SKU valid nhưng chưa có category
+  const uncatRows = uncatSkus.map(sku => {
+    const m = master[sku] || {};
+    return `<tr>
+      <td class="mono" style="font-size:12px;">${sku}</td>
+      <td style="color:var(--text3);font-size:12px;">${m.product_name ? m.product_name.slice(0,40)+'…' : '—'}</td>
+      <td><span style="color:var(--text3);font-size:11px;">— SKU hợp lệ —</span></td>
+      <td><input type="text" placeholder="Large category..." id="lcat-${sku}" list="dl-large-cat" style="width:150px;" value="${m.large_category||''}"></td>
+      <td><input type="text" placeholder="Medium category..." id="mcat-${sku}" list="dl-medium-cat" style="width:150px;" value="${m.medium_category||''}"></td>
+      <td><span class="status-badge" style="background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border);">Chưa có Category</span></td>
+      <td><button class="btn btn-sm btn-primary" onclick="saveCategoryOnly('${sku}')">Lưu</button></td>
+    </tr>`;
+  });
+
+  const allRows = [...mappingRows, ...uncatRows];
+  document.getElementById('mapping-body').innerHTML = allRows.join('') ||
+    '<tr><td colspan="7" class="empty">Không có SKU lỗi 🎉</td></tr>';
+}
+
+// Lưu category cho SKU đã có trong master nhưng chưa có category
+async function saveCategoryOnly(sku) {
+  const lcat = document.getElementById(`lcat-${sku}`)?.value.trim() || null;
+  const mcat = document.getElementById(`mcat-${sku}`)?.value.trim() || null;
+  if (!lcat && !mcat) { showToast('Nhập ít nhất 1 category', 'error'); return; }
+  try {
+    await sbUpsert('sku_master', { sku, large_category: lcat, medium_category: mcat, status: 'active' });
+    // Cập nhật local cache
+    const idx = skuMasterCache.findIndex(s => s.sku === sku);
+    if (idx >= 0) { skuMasterCache[idx].large_category = lcat; skuMasterCache[idx].medium_category = mcat; }
+    else skuMasterCache.push({ sku, large_category: lcat, medium_category: mcat, status: 'active' });
+    showToast(`Đã lưu category cho ${sku}`, 'success');
+    loadMappingAndUncat();
+  } catch(e) { showToast('Lỗi: ' + e.message, 'error'); }
+}
+
+function renderMatched(rows) {
+  document.getElementById('mapped-body').innerHTML = rows.map(r => `<tr>
+    <td class="mono" style="font-size:12px;">${r.sku_raw}</td>
+    <td class="mono" style="font-size:12px;">${r.sku_adjusted||'—'}</td>
+    <td class="mono" style="font-size:12px;font-weight:500;">${r.sku_final||'—'}</td>
+    <td><button class="btn btn-sm btn-danger" onclick="deleteMapping('${r.sku_raw}')">✕</button></td>
+  </tr>`).join('') || '<tr><td colspan="4" class="empty">Chưa có mapping</td></tr>';
+}
+
+async function confirmMapping(skuRaw, isUncat) {
+  const adj  = document.getElementById(`adj-${skuRaw}`)?.value.trim();
+  const lcat = document.getElementById(`lcat-${skuRaw}`)?.value.trim() || null;
+  const mcat = document.getElementById(`mcat-${skuRaw}`)?.value.trim() || null;
+  if (!adj) { showToast('Nhập SKU đúng trước', 'error'); return; }
+  const exists = skuMasterCache.find(s => s.sku === adj);
+  if (!exists) { showToast(`SKU "${adj}" không có trong master`, 'error'); return; }
+  try {
+    await sbUpsert('sku_mapping', { sku_raw: skuRaw, sku_adjusted: adj, sku_final: adj, matched: true, updated_at: new Date().toISOString() });
+    // Nếu có nhập category thì lưu luôn vào sku_master
+    if (lcat || mcat) {
+      await sbUpsert('sku_master', { sku: adj, large_category: lcat, medium_category: mcat, status: 'active' });
+      const idx = skuMasterCache.findIndex(s => s.sku === adj);
+      if (idx >= 0) { skuMasterCache[idx].large_category = lcat; skuMasterCache[idx].medium_category = mcat; }
+    }
+    showToast('Đã mapping!', 'success');
+    loadMappingAndUncat();
+  } catch(e) { showToast('Lỗi: ' + e.message, 'error'); }
+}
+
+async function deleteMapping(skuRaw) {
+  if (!confirm('Xóa mapping này?')) return;
+  try {
+    await sbDelete('sku_mapping', `sku_raw=eq.${encodeURIComponent(skuRaw)}`);
+    showToast('Đã xóa', 'success');
+    loadMappingAndUncat();
+  } catch(e) { showToast('Lỗi: ' + e.message, 'error'); }
+}
+
+// ============================================================
+// ADMIN — CONFIG
+// ============================================================
+const DB_FIELDS = [
+  { key: 'order_id_col',   label: 'order_id',    desc: 'Mã đơn hàng' },
+  { key: 'order_date_col', label: 'order_date',  desc: 'Ngày đặt hàng' },
+  { key: 'status_col',     label: 'status',      desc: 'Trạng thái đơn hàng' },
+  { key: 'sku_col',        label: 'sku',         desc: 'SKU sản phẩm (Item name)' },
+  { key: 'sku_parent_col', label: 'sku_parent',  desc: 'SKU cha — để trống nếu không có' },
+  { key: 'product_col',    label: 'product_name',desc: 'Tên sản phẩm' },
+  { key: 'qty_col',        label: 'qty',         desc: 'Số lượng' },
+  { key: 'revenue_col',    label: 'revenue',     desc: 'Doanh thu thực nhận' },
+];
+const META_FIELDS = [
+  { key: 'status_cancel_val', label: 'Giá trị "Đã hủy"', desc: 'Ngăn cách bằng dấu phẩy. VD: Đã hủy, Hủy, Cancelled' },
+  { key: 'header_row',        label: 'Dòng header',       desc: 'VD: 1' },
+  { key: 'file_type',         label: 'Loại file',         desc: 'xlsx hoặc csv' },
+  { key: 'date_format',       label: 'Format ngày',       desc: 'VD: auto, dd/mm/yyyy' },
+];
+
+let adminMode = 'config';
+function setAdminMode(m) {
+  adminMode = m;
+  document.getElementById('admin-config').style.display = m === 'config' ? '' : 'none';
+  document.getElementById('admin-lock').style.display   = m === 'lock'   ? '' : 'none';
+  document.getElementById('admin-audit').style.display  = m === 'audit'  ? '' : 'none';
+  ['config','lock','audit'].forEach(mode => {
+    const btn = document.getElementById(`admin-mode-${mode}`);
+    if (btn) btn.style.cssText = m === mode ? 'background:var(--green-bg);color:var(--green);border-color:var(--green3);' : '';
+  });
+  if (m === 'config') loadConfigs();
+  if (m === 'lock')   loadLocks();
+}
+
+async function loadConfigs() {
+  try {
+    const data = await sbGet('platform_config', '?order=platform');
+    const el = document.getElementById('config-list');
+    if (!data.length) { el.innerHTML = '<div class="empty">Chưa có platform nào.</div>'; return; }
+    el.innerHTML = data.map(p => renderPlatformCard(p)).join('');
+    data.forEach(p => { if (p.updated_at) lockConfig(p.platform); });
+  } catch(e) { document.getElementById('config-list').innerHTML = `<div class="loading">Lỗi: ${e.message}</div>`; }
+}
+
+function tagClass(p) {
+  if (p.includes('t2c')) return 'tag-t2c';
+  if (p.includes('k2c')) return 'tag-k2c';
+  if (p.includes('tiktok')) return 'tag-tiktok';
+  return 'tag-new';
+}
+
+function renderPlatformCard(p) {
+  const pid = p.platform;
+  const dbRows = DB_FIELDS.map(f => `<tr>
+    <td><div class="col-name">${f.label}</div><div class="col-desc">${f.desc}</div></td>
+    <td><input type="text" id="${pid}_${f.key}" value="${p[f.key]??''}" placeholder="${f.desc}"></td>
+  </tr>`).join('');
+  const metaRows = META_FIELDS.map(f => `<tr>
+    <td><div class="col-name">${f.label}</div><div class="col-desc">${f.desc}</div></td>
+    <td><input type="text" id="${pid}_${f.key}" value="${p[f.key]??''}" placeholder="${f.desc}"></td>
+  </tr>`).join('');
+
+  return `<div class="card" id="card-${pid}">
+    <div class="card-header">
+      <div class="card-title">
+        <span class="plat-tag ${tagClass(pid)}">${pid}</span>
+        <input type="text" id="${pid}_platform_name" value="${p.platform_name||''}" placeholder="Tên hiển thị"
+          style="border:none;background:transparent;font-size:13px;font-weight:500;color:var(--text);width:160px;padding:0;outline:none;">
+      </div>
+      <div class="flex gap-6">
+        <button class="btn btn-sm btn-edit" id="edit-btn-${pid}" onclick="editConfig('${pid}')" style="display:none;">Sửa</button>
+        <button class="btn btn-sm btn-primary" id="save-btn-${pid}" onclick="saveConfig('${pid}')">Lưu</button>
+        <button class="btn btn-sm btn-danger" onclick="deletePlatform('${pid}')">Xóa</button>
+      </div>
+    </div>
+    <table class="config-table">
+      <thead><tr><th>Cột trong database</th><th>Tên header trong file Excel / CSV</th></tr></thead>
+      <tbody>${dbRows}</tbody>
+    </table>
+    <div style="padding:6px 14px;background:var(--bg);border-top:0.5px solid var(--border);font-size:10px;color:var(--text3);letter-spacing:0.04em;text-transform:uppercase;">Cài đặt thêm</div>
+    <table class="config-table"><tbody>${metaRows}</tbody></table>
+  </div>`;
+}
+
+function lockConfig(pid) {
+  const card = document.getElementById(`card-${pid}`); if (!card) return;
+  card.classList.add('readonly');
+  document.getElementById(`edit-btn-${pid}`).style.display = 'inline-flex';
+  document.getElementById(`save-btn-${pid}`).style.display = 'none';
+}
+function editConfig(pid) {
+  const card = document.getElementById(`card-${pid}`); if (!card) return;
+  card.classList.remove('readonly');
+  document.getElementById(`edit-btn-${pid}`).style.display = 'none';
+  document.getElementById(`save-btn-${pid}`).style.display = 'inline-flex';
+}
+
+async function saveConfig(pid) {
+  const btn = document.getElementById(`save-btn-${pid}`);
+  btn.textContent = 'Đang lưu...'; btn.disabled = true;
+  const data = { platform: pid, platform_name: document.getElementById(`${pid}_platform_name`)?.value.trim()||null };
+  DB_FIELDS.forEach(f => { const v = document.getElementById(`${pid}_${f.key}`)?.value.trim(); data[f.key] = v||null; });
+  META_FIELDS.forEach(f => { const v = document.getElementById(`${pid}_${f.key}`)?.value.trim(); data[f.key] = v||null; });
+  data.updated_at = new Date().toISOString();
+  try {
+    await sbUpsert('platform_config', data);
+    btn.textContent = '✓ Đã lưu'; btn.style.background = '#2d5509';
+    showToast(`Đã lưu ${pid}`, 'success');
+    setTimeout(() => { btn.textContent='Lưu'; btn.style.background=''; btn.disabled=false; lockConfig(pid); }, 1500);
+  } catch(e) { btn.textContent='Lưu'; btn.disabled=false; showToast('Lỗi: '+e.message,'error'); }
+}
+
+function addPlatform() {
+  const id = prompt('Nhập platform ID (chữ thường, không dấu):');
+  if (!id || !/^[a-z0-9_]+$/.test(id)) { showToast('ID không hợp lệ','error'); return; }
+  if (document.getElementById(`card-${id}`)) { showToast('Đã tồn tại','error'); return; }
+  const el = document.getElementById('config-list');
+  const div = document.createElement('div');
+  div.innerHTML = renderPlatformCard({ platform: id });
+  el.appendChild(div.firstElementChild);
+}
+
+async function deletePlatform(pid) {
+  if (!confirm(`Xóa platform "${pid}"?`)) return;
+  try { await sbDelete('platform_config', `platform=eq.${pid}`); document.getElementById(`card-${pid}`)?.remove(); showToast('Đã xóa','success'); }
+  catch(e) { showToast('Lỗi: '+e.message,'error'); }
+}
+
+// ============================================================
+// ADMIN — LOCK
+// ============================================================
+async function loadLocks() {
+  try {
+    const data = await sbGet('month_lock', '?order=month_year.desc');
+    const el = document.getElementById('lock-list');
+    if (!data.length) { el.innerHTML = '<div class="empty">Chưa có tháng nào.</div>'; return; }
+    el.innerHTML = `<table style="width:100%;border-collapse:collapse;">
+      <thead><tr>
+        <th style="text-align:left;font-size:10px;color:var(--text3);padding:8px 14px;border-bottom:0.5px solid var(--border);background:var(--bg);">Tháng</th>
+        <th style="text-align:left;font-size:10px;color:var(--text3);padding:8px 14px;border-bottom:0.5px solid var(--border);background:var(--bg);">Trạng thái</th>
+        <th style="text-align:left;font-size:10px;color:var(--text3);padding:8px 14px;border-bottom:0.5px solid var(--border);background:var(--bg);">Thời gian lock</th>
+        <th style="padding:8px 14px;border-bottom:0.5px solid var(--border);background:var(--bg);"></th>
+      </tr></thead>
+      <tbody>${data.map(m=>`<tr>
+        <td style="padding:10px 14px;border-bottom:0.5px solid var(--border);font-weight:500;font-family:'DM Mono',monospace;">${m.month_year}</td>
+        <td style="padding:10px 14px;border-bottom:0.5px solid var(--border);">${m.is_locked?'<span class="status-badge status-locked">🔒 Locked (snapshot)</span>':'<span class="status-badge status-open">🟡 Open (live)</span>'}</td>
+        <td style="padding:10px 14px;border-bottom:0.5px solid var(--border);color:var(--text3);font-size:11px;">${m.locked_at?new Date(m.locked_at).toLocaleString('en-US'):'—'}</td>
+        <td style="padding:10px 14px;border-bottom:0.5px solid var(--border);text-align:right;">
+          <div class="flex gap-6" style="justify-content:flex-end;">
+            ${m.is_locked
+              ? `<button class="btn btn-sm btn-danger" onclick="unlockMonth('${m.month_year}')">Unlock</button>`
+              : `<button class="btn btn-sm btn-primary" onclick="lockMonth('${m.month_year}')">Lock</button>`}
+            <button class="btn btn-sm btn-danger" onclick="deleteMonth('${m.month_year}')">✕</button>
+          </div>
+        </td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  } catch(e) {}
+}
+
+async function addMonth() {
+  const val = document.getElementById('new-month').value;
+  if (!val) { showToast('Chọn tháng trước','error'); return; }
+  try { await sbUpsert('month_lock',{month_year:val,is_locked:false}); showToast(`Đã thêm ${val}`,'success'); loadLocks(); }
+  catch(e) { showToast('Lỗi: '+e.message,'error'); }
+}
+// ============================================================
+// AUDIT
+// ============================================================
+function runAudit() {
+  if (!_allOrdersLoaded || !_allOrders?.length) {
+    showToast('Chờ data load xong rồi chạy audit', 'error');
+    return;
+  }
+
+  // Show loading state
+  const btn = document.querySelector('[onclick="runAudit()"]');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang chạy...'; }
+  document.getElementById('audit-summary').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;color:var(--text3);font-size:13px;">
+      <div class="loading-spinner"></div> Đang phân tích ${_allOrders.length.toLocaleString('en-US')} dòng dữ liệu...
+    </div>`;
+
+  // Defer execution để UI kịp render loading
+  setTimeout(() => {
+    try {
+      _runAuditCore();
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = '▶ Chạy lại Audit'; }
+    }
+  }, 50);
+}
+
+function _runAuditCore() {
+  const orders = _allOrders;
+  const master = {};
+  skuMasterCache.forEach(s => master[s.sku] = s);
+  const platMap = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop' };
+
+  // ---- Check 1: GM% bất thường ----
+  const gmIssues = [];
+  const bySkuPlat = {};
+  orders.forEach(r => {
+    const k = (r.sku||'') + '|' + (r.platform||'');
+    if (!bySkuPlat[k]) bySkuPlat[k] = { sku: r.sku, platform: r.platform, rev: 0, cogs: 0, profit: 0 };
+    bySkuPlat[k].rev    += Number(r.revenue)||0;
+    bySkuPlat[k].cogs   += Number(r.cogs)||0;
+    bySkuPlat[k].profit += Number(r.gross_profit)||0;
+  });
+  Object.values(bySkuPlat).forEach(r => {
+    const gm = r.rev > 0 ? r.profit/r.rev*100 : null;
+    const m = master[r.sku] || {};
+    if (gm === null) return;
+    let issue = null;
+    if (gm <= 0)   issue = 'GM% âm hoặc = 0';
+    if (gm >= 100) issue = 'GM% = 100% (thiếu giá vốn?)';
+    if (issue) gmIssues.push({ ...r, gm, issue, name: m.product_name || r.sku });
+  });
+  document.getElementById('audit-gm-count').textContent = `${gmIssues.length} vấn đề`;
+  document.getElementById('audit-gm-body').innerHTML = gmIssues.sort((a,b)=>a.gm-b.gm).map(r => `<tr>
+    <td class="mono" style="font-size:11px;">${r.sku}</td>
+    <td style="font-size:12px;">${r.name}</td>
+    <td><span class="plat-tag tag-${r.platform==='shopee_t2c'?'t2c':r.platform==='shopee_k2c'?'k2c':'tiktok'}">${platMap[r.platform]||r.platform}</span></td>
+    <td class="right">${fmtMoney(r.rev)}</td>
+    <td class="right">${fmtMoney(r.cogs)}</td>
+    <td class="right"><span class="gm-badge gm-low">${r.gm.toFixed(1)}%</span></td>
+    <td style="color:var(--amber);font-size:12px;">⚠️ ${r.issue}</td>
+  </tr>`).join('') || '<tr><td colspan="7" class="empty" style="color:var(--green);">✓ Không có vấn đề</td></tr>';
+
+  // ---- Check 2: Missing COGS ----
+  const cogsIssues = Object.values(bySkuPlat).filter(r => r.rev > 0 && r.cogs === 0);
+  document.getElementById('audit-cogs-count').textContent = `${cogsIssues.length} SKU`;
+  document.getElementById('audit-cogs-body').innerHTML = cogsIssues.sort((a,b)=>b.rev-a.rev).map(r => {
+    const m = master[r.sku]||{};
+    const qty = orders.filter(o => o.sku===r.sku && o.platform===r.platform).reduce((s,o)=>s+(Number(o.qty)||0),0);
+    return `<tr>
+      <td class="mono" style="font-size:11px;">${r.sku}</td>
+      <td style="font-size:12px;">${m.product_name||'—'}</td>
+      <td><span class="plat-tag tag-${r.platform==='shopee_t2c'?'t2c':r.platform==='shopee_k2c'?'k2c':'tiktok'}">${platMap[r.platform]||r.platform}</span></td>
+      <td class="right">${qty.toLocaleString('en-US')}</td>
+      <td class="right">${fmtMoney(r.rev)}</td>
+      <td class="right" style="color:var(--red);">0</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" class="empty" style="color:var(--green);">✓ Tất cả SKU đều có giá vốn</td></tr>';
+
+  // ---- Check 3: Spike detection ----
+  const byDay = {};
+  orders.forEach(r => {
+    const d = String(r.order_date||'').slice(0,10);
+    if (!d) return;
+    if (!byDay[d]) byDay[d] = { date: d, rev: 0 };
+    byDay[d].rev += Number(r.revenue)||0;
+  });
+  const dayRevs = Object.values(byDay).sort((a,b)=>a.date.localeCompare(b.date));
+  const revArr = dayRevs.map(d => d.rev).sort((a,b)=>a-b);
+  const median = revArr[Math.floor(revArr.length/2)] || 0;
+  const spikes = dayRevs.filter(d => d.rev > median * 3 && median > 0);
+  document.getElementById('audit-spike-count').textContent = `${spikes.length} ngày`;
+  document.getElementById('audit-spike-body').innerHTML = spikes.sort((a,b)=>b.rev-a.rev).map(r => `<tr>
+    <td>${r.date}</td>
+    <td style="color:var(--text3);">Tất cả</td>
+    <td class="right">${fmtMoney(r.rev)}</td>
+    <td class="right">${fmtMoney(median)}</td>
+    <td class="right" style="color:var(--amber);font-weight:600;">${(r.rev/median).toFixed(1)}x</td>
+  </tr>`).join('') || '<tr><td colspan="5" class="empty" style="color:var(--green);">✓ Không có đột biến bất thường</td></tr>';
+
+  // ---- Check 4: Gap months ----
+  const monthSet = new Set(orders.map(r => String(r.order_date||'').slice(0,7)).filter(Boolean));
+  const months = [...monthSet].sort();
+  const gaps = [];
+  if (months.length > 1) {
+    for (let i = 0; i < months.length - 1; i++) {
+      const [y1,m1] = months[i].split('-').map(Number);
+      const [y2,m2] = months[i+1].split('-').map(Number);
+      const diff = (y2-y1)*12 + (m2-m1);
+      if (diff > 1) {
+        for (let j = 1; j < diff; j++) {
+          const gapMonth = new Date(y1, m1-1+j, 1);
+          gaps.push(`${gapMonth.getFullYear()}-${String(gapMonth.getMonth()+1).padStart(2,'0')}`);
+        }
+      }
+    }
+  }
+  document.getElementById('audit-gap-body').innerHTML = gaps.length > 0
+    ? `<div style="padding:12px 16px;"><span style="color:var(--red);">⚠️ Thiếu data tháng: </span><strong>${gaps.join(', ')}</strong></div>`
+    : `<div style="padding:12px 16px;color:var(--green);">✓ Không có tháng nào bị thiếu (${months[0]} → ${months[months.length-1]})</div>`;
+
+  // ---- Check 5: Negative revenue ----
+  const negRevs = orders.filter(r => Number(r.revenue) < 0);
+  document.getElementById('audit-neg-count').textContent = `${negRevs.length} dòng`;
+  document.getElementById('audit-neg-body').innerHTML = negRevs.slice(0,50).map(r => `<tr>
+    <td class="mono" style="font-size:11px;">${r.sku||'—'}</td>
+    <td><span class="plat-tag tag-${r.platform==='shopee_t2c'?'t2c':r.platform==='shopee_k2c'?'k2c':'tiktok'}">${platMap[r.platform]||r.platform||'—'}</span></td>
+    <td>${String(r.order_date||'').slice(0,10)}</td>
+    <td class="right" style="color:var(--red);">${fmtMoney(r.revenue)}</td>
+    <td class="right">${fmtMoney(r.cogs)}</td>
+  </tr>`).join('') || '<tr><td colspan="5" class="empty" style="color:var(--green);">✓ Không có doanh thu âm</td></tr>';
+
+  // ---- Summary badges — clickable, scroll to anchor ----
+  const total = gmIssues.length + cogsIssues.length + spikes.length + gaps.length + negRevs.length;
+  const badgeDefs = [
+    { label: 'GM% bất thường',  count: gmIssues.length,   anchor: 'anchor-gm',    warn: gmIssues.length > 0 },
+    { label: 'Thiếu giá vốn',   count: cogsIssues.length, anchor: 'anchor-cogs',  warn: cogsIssues.length > 0 },
+    { label: 'Spike doanh thu', count: spikes.length,      anchor: 'anchor-spike', warn: spikes.length > 0 },
+    { label: 'Tháng bị gap',    count: gaps.length,        anchor: 'anchor-gap',   warn: gaps.length > 0 },
+    { label: 'Doanh thu âm',    count: negRevs.length,     anchor: 'anchor-neg',   warn: negRevs.length > 0 },
+  ];
+  document.getElementById('audit-summary').innerHTML = badgeDefs.map(b => {
+    const color = b.warn ? 'var(--amber)' : 'var(--green)';
+    return `<div onclick="document.getElementById('${b.anchor}').scrollIntoView({behavior:'smooth',block:'start'})"
+      style="padding:6px 14px;border-radius:20px;border:0.5px solid ${color};background:${color}22;
+             font-size:12px;color:${color};font-weight:600;cursor:pointer;"
+      onmouseover="this.style.opacity='.7'" onmouseout="this.style.opacity='1'">
+      ${b.warn ? '⚠️' : '✓'} ${b.label}: ${b.count}
+    </div>`;
+  }).join('');
+
+  showToast(`Audit hoàn tất — ${total} vấn đề cần kiểm tra`, total > 0 ? 'error' : 'success');
+}
+
+async function lockAllPastMonths() {
+  const now = new Date();
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  if (!confirm(`Lock tất cả tháng trước ${currentMonth}?\nMỗi tháng sẽ được snapshot lại. Có thể mất vài phút.`)) return;
+  if (!_allOrders?.length) { showToast('Data chưa load xong', 'error'); return; }
+
+  const months = [...new Set(_allOrders.map(r => String(r.order_date||'').slice(0,7)))]
+    .filter(m => m && m < currentMonth).sort();
+
+  if (!months.length) { showToast('Không có tháng nào cần lock', 'error'); return; }
+
+  let successCount = 0, failCount = 0;
+  for (let i = 0; i < months.length; i++) {
+    const m = months[i];
+    setLoadingState(true, `Đang lock ${m} (${i+1}/${months.length})...`);
+    try {
+      // Upsert vào month_lock trước
+      await sbUpsert('month_lock', { month_year: m, is_locked: false });
+      // Gọi RPC snapshot — retry 1 lần nếu fail
+      let ok = false;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/lock_month_data`, {
+          method: 'POST',
+          headers: sbHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ p_month_year: m })
+        });
+        if (res.ok) { ok = true; break; }
+        if (attempt === 0) await new Promise(r => setTimeout(r, 1000)); // wait 1s rồi retry
+      }
+      if (ok) successCount++;
+      else { failCount++; console.warn(`Lock ${m} failed after retry`); }
+    } catch(e) {
+      failCount++;
+      console.warn(`Lock ${m} error:`, e.message);
+    }
+  }
+
+  setLoadingState(false);
+  if (failCount === 0) showToast(`✓ Đã lock ${successCount} tháng thành công!`, 'success');
+  else showToast(`Lock xong: ${successCount} thành công, ${failCount} thất bại`, 'error');
+  loadLocks();
+}
+
+async function unlockAllMonths() {
+  if (!confirm('Unlock tất cả tháng?\nData sẽ đọc lại từ orders live, snapshot sẽ bị xóa.')) return;
+  setLoadingState(true, 'Đang unlock tất cả...');
+  try {
+    // Xóa toàn bộ snapshots
+    await sbDelete('monthly_snapshots', 'month_year=gte.2000-01');
+    // Reset tất cả is_locked = false
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/month_lock?is_locked=eq.true`, {
+      method: 'PATCH',
+      headers: sbHeaders({ 'Prefer': 'return=minimal' }),
+      body: JSON.stringify({ is_locked: false, locked_at: null })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    setLoadingState(false);
+    showToast('Đã unlock tất cả tháng!', 'success');
+    loadLocks();
+  } catch(e) {
+    setLoadingState(false);
+    showToast('Lỗi: ' + e.message, 'error');
+  }
+}
+async function lockMonth(m) {
+  if (!confirm(`Lock tháng ${m}? Data sẽ được snapshot và không thay đổi khi có data mới.`)) return;
+  try {
+    setLoadingState(true, `Đang lock ${m}...`);
+    // Gọi RPC để copy data vào snapshot
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/lock_month_data`, {
+      method: 'POST',
+      headers: sbHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ p_month_year: m })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    setLoadingState(false);
+    showToast(`Đã lock tháng ${m} thành công!`, 'success');
+    loadLocks();
+    // Reload data vì locked months giờ đọc từ snapshot
+    _allOrdersLoaded = false;
+    await fetchAllOrders();
+    renderFromCache();
+  } catch(e) {
+    setLoadingState(false);
+    showToast('Lỗi lock: ' + e.message, 'error');
+  }
+}
+async function unlockMonth(m) {
+  if (!confirm(`Unlock tháng ${m}? Data sẽ đọc lại từ orders live.`)) return;
+  try {
+    // Xóa snapshot + update flag
+    await sbDelete('monthly_snapshots', `month_year=eq.${m}`);
+    await sbUpsert('month_lock', { month_year: m, is_locked: false, locked_at: null });
+    showToast(`Đã unlock ${m}`, 'success');
+    loadLocks();
+    // Reload data
+    _allOrdersLoaded = false;
+    await fetchAllOrders();
+    renderFromCache();
+  } catch(e) { showToast('Lỗi: ' + e.message, 'error'); }
+}
+async function deleteMonth(m) {
+  if (!confirm(`Xóa tháng ${m} khỏi danh sách?`)) return;
+  try { await sbDelete('month_lock',`month_year=eq.${m}`); showToast(`Đã xóa ${m}`,'success'); loadLocks(); }
+  catch(e) { showToast('Lỗi: '+e.message,'error'); }
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function setUnit(u) {
+  displayUnit = u;
+  const sel = document.getElementById('unit-select');
+  if (sel) sel.value = u;
+  renderFromCache(); // No network — just re-render
+}
+
+function fmtMoney(v) {
+  if (v === null || v === undefined || isNaN(v)) return '—';
+  v = Number(v);
+  if (displayUnit === 'mvnd') {
+    return (v / 1e6).toLocaleString('en-US', {minimumFractionDigits:1, maximumFractionDigits:1});
+  } else if (displayUnit === 'kvnd') {
+    return Math.round(v / 1e3).toLocaleString('en-US');
+  } else {
+    return Math.round(v).toLocaleString('en-US');
+  }
+}
+function fmtNum(v) { return v ? Number(v).toLocaleString('en-US') : '—'; }
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', e => {
+  if (!e.target.closest('#cost-sku-search') && !e.target.closest('#sku-dropdown')) {
+    document.getElementById('sku-dropdown')?.classList.remove('show');
+  }
+});
+</script>
+</body>
+</html>
