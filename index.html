@@ -1305,7 +1305,7 @@ async function fetchAllOrders(forceRefetch) {
       qty:         Number(r.qty) || 0,
       order_date:  r.order_date,
       platform:    r.platform,
-      month_year:  r.month_year,
+      month_year: r.month_year,
       _order_count: Number(r.order_count) || 0,
     }));
     _allOrdersLoaded = true;
@@ -1582,18 +1582,19 @@ function buildSkuTableFromOrders(orders) {
     const platTag = r.platform
       ? `<span class="plat-tag tag-${r.platform==='shopee_t2c'?'t2c':r.platform==='shopee_k2c'?'k2c':'tiktok'}">${platMap[r.platform]||r.platform}</span>`
       : '<span style="color:var(--text3);">—</span>';
+    const aov = r.qty > 0 ? Math.round(r.rev / r.qty) : 0;
     return `<tr>
-      <td style="color:var(--text3);">${r.rank}</td>
+      <td data-sort="${r.rank}" style="color:var(--text3);">${r.rank}</td>
       <td class="mono" style="font-size:11px;">${r.sku}</td>
       <td>${r.product_name || m.product_name || '—'}</td>
       <td style="color:var(--text3);font-size:12px;">${cat}</td>
       <td>${platTag}</td>
-      <td class="right">${r.qty.toLocaleString('en-US')}</td>
-      <td class="right">${fmtMoney(r.rev)}</td>
-      <td class="right">${fmtMoney(r.cogs)}</td>
-      <td class="right">${fmtMoney(r.profit)}</td>
-      <td class="right"><span class="gm-badge ${r.gm>=30?'gm-high':r.gm>=15?'gm-mid':'gm-low'}">${r.gm.toFixed(1)}%</span></td>
-      <td class="right">${fmtMoney(r.qty > 0 ? Math.round(r.rev / r.qty) : 0)}</td>
+      <td class="right" data-sort="${r.qty}">${r.qty.toLocaleString('en-US')}</td>
+      <td class="right" data-sort="${r.rev}">${fmtMoney(r.rev)}</td>
+      <td class="right" data-sort="${r.cogs}">${fmtMoney(r.cogs)}</td>
+      <td class="right" data-sort="${r.profit}">${fmtMoney(r.profit)}</td>
+      <td class="right" data-sort="${r.gm}"><span class="gm-badge ${r.gm>=30?'gm-high':r.gm>=15?'gm-mid':'gm-low'}">${r.gm.toFixed(1)}%</span></td>
+      <td class="right" data-sort="${aov}">${fmtMoney(aov)}</td>
     </tr>`;
   }).join('') || '<tr><td colspan="11" class="empty">Không có dữ liệu</td></tr>';
   makeSortable('tbl-sku');
@@ -1722,15 +1723,16 @@ function buildTimeTable(orders) {
   const platLabel = platVal ? platMap[{ shopee_t2c:'t2c', shopee_k2c:'k2c', tiktok:'tiktok' }[platVal]] || platVal : 'Tất cả';
   document.getElementById('time-table-body').innerHTML = rows.map(r => {
     const gm = r.rev > 0 ? r.profit/r.rev*100 : 0;
+    const aov = r.orders > 0 ? Math.round(r.rev / r.orders) : 0;
     return `<tr>
-      <td style="font-size:13px;">${r.period}</td>
+      <td data-sort="${r.period}" style="font-size:13px;">${r.period}</td>
       <td style="color:var(--text3);">${platLabel}</td>
-      <td class="right">${fmtMoney(r.rev)}</td>
-      <td class="right">${fmtMoney(r.cogs)}</td>
-      <td class="right">${fmtMoney(r.profit)}</td>
-      <td class="right"><span class="gm-badge ${gm>=30?'gm-high':gm>=15?'gm-mid':'gm-low'}">${gm.toFixed(1)}%</span></td>
-      <td class="right">${r.orders.toLocaleString('en-US')}</td>
-      <td class="right">${fmtMoney(r.orders > 0 ? Math.round(r.rev / r.orders) : 0)}</td>
+      <td class="right" data-sort="${r.rev}">${fmtMoney(r.rev)}</td>
+      <td class="right" data-sort="${r.cogs}">${fmtMoney(r.cogs)}</td>
+      <td class="right" data-sort="${r.profit}">${fmtMoney(r.profit)}</td>
+      <td class="right" data-sort="${gm}"><span class="gm-badge ${gm>=30?'gm-high':gm>=15?'gm-mid':'gm-low'}">${gm.toFixed(1)}%</span></td>
+      <td class="right" data-sort="${r.orders}">${r.orders.toLocaleString('en-US')}</td>
+      <td class="right" data-sort="${aov}">${fmtMoney(aov)}</td>
     </tr>`;
   }).join('') || '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>';
   makeSortable('tbl-time');
@@ -1750,18 +1752,20 @@ function renderCatOverviewTable(rows) {
   const platVal = platform === 'all' ? null : { t2c:'shopee_t2c', k2c:'shopee_k2c', tiktok:'tiktok' }[platform];
   document.getElementById('cat-overview-body').innerHTML = rows.map((r,i) => {
     const gm = r.rev > 0 ? r.profit/r.rev*100 : 0;
+    const aov = r.qty > 0 ? Math.round(r.rev / r.qty) : 0;
     return `<tr>
-      <td style="color:var(--text3);">${i+1}</td>
+      <td data-sort="${i+1}" style="color:var(--text3);">${i+1}</td>
       <td style="font-weight:500;">${r.med}</td>
       <td style="color:var(--text3);">${platVal ? (platMap[platVal]||platVal) : 'Tất cả'}</td>
-      <td class="right">${r.qty.toLocaleString('en-US')}</td>
-      <td class="right">${fmtMoney(r.rev)}</td>
-      <td class="right">${fmtMoney(r.cogs)}</td>
-      <td class="right">${fmtMoney(r.profit)}</td>
-      <td class="right"><span class="gm-badge ${gm>=30?'gm-high':gm>=15?'gm-mid':'gm-low'}">${gm.toFixed(1)}%</span></td>
-      <td class="right">${fmtMoney(r.qty > 0 ? Math.round(r.rev / r.qty) : 0)}</td>
+      <td class="right" data-sort="${r.qty}">${r.qty.toLocaleString('en-US')}</td>
+      <td class="right" data-sort="${r.rev}">${fmtMoney(r.rev)}</td>
+      <td class="right" data-sort="${r.cogs}">${fmtMoney(r.cogs)}</td>
+      <td class="right" data-sort="${r.profit}">${fmtMoney(r.profit)}</td>
+      <td class="right" data-sort="${gm}"><span class="gm-badge ${gm>=30?'gm-high':gm>=15?'gm-mid':'gm-low'}">${gm.toFixed(1)}%</span></td>
+      <td class="right" data-sort="${aov}">${fmtMoney(aov)}</td>
     </tr>`;
   }).join('') || '<tr><td colspan="9" class="empty">Không có dữ liệu</td></tr>';
+  makeSortable('tbl-cat-ovr');
   makeSortable('tbl-cat-ovr');
 }
 
@@ -2145,10 +2149,10 @@ function renderSkuTableFromRpc(rows) {
       <td>${r.product_name || m.product_name || '—'}</td>
       <td style="color:var(--text3);font-size:12px;">${cat}</td>
       <td>${platTag}</td>
-      <td class="right">${r.qty.toLocaleString('en-US')}</td>
-      <td class="right">${fmtMoney(r.rev)}</td>
-      <td class="right">${fmtMoney(r.cogs||0)}</td>
-      <td class="right">${fmtMoney(r.profit||0)}</td>
+      <td class="right" data-sort="${r.qty}">${r.qty.toLocaleString('en-US')}</td>
+      <td class="right" data-sort="${r.rev}">${fmtMoney(r.rev)}</td>
+      <td class="right" data-sort="${r.cogs||0}">${fmtMoney(r.cogs||0)}</td>
+      <td class="right" data-sort="${r.profit||0}">${fmtMoney(r.profit||0)}</td>
       <td class="right"><span class="gm-badge ${r.gm>=30?'gm-high':r.gm>=15?'gm-mid':'gm-low'}">${r.gm.toFixed(1)}%</span></td>
       <td class="right">${fmtMoney(r.qty > 0 ? Math.round(r.rev / r.qty) : 0)}</td>
     </tr>`;
@@ -2173,10 +2177,10 @@ function renderSkuTable(rows) {
       <td>${r.product_name || m.product_name || '—'}</td>
       <td style="color:var(--text3);font-size:12px;">${cat}</td>
       <td>${r.platform ? `<span class="plat-tag tag-${r.platform === 'shopee_t2c' ? 't2c' : r.platform === 'shopee_k2c' ? 'k2c' : 'tiktok'}">${platMap[r.platform]||r.platform}</span>` : '<span style="color:var(--text3);font-size:11px;">—</span>'}</td>
-      <td class="right">${r.qty.toLocaleString('en-US')}</td>
-      <td class="right">${fmtMoney(r.rev)}</td>
-      <td class="right">${fmtMoney(r.cogs||0)}</td>
-      <td class="right">${fmtMoney(r.profit||0)}</td>
+      <td class="right" data-sort="${r.qty}">${r.qty.toLocaleString('en-US')}</td>
+      <td class="right" data-sort="${r.rev}">${fmtMoney(r.rev)}</td>
+      <td class="right" data-sort="${r.cogs||0}">${fmtMoney(r.cogs||0)}</td>
+      <td class="right" data-sort="${r.profit||0}">${fmtMoney(r.profit||0)}</td>
       <td class="right"><span class="gm-badge ${r.gm>=30?'gm-high':r.gm>=15?'gm-mid':'gm-low'}">${r.gm.toFixed(1)}%</span></td>
       <td class="right">${fmtMoney(r.qty > 0 ? Math.round(r.rev / r.qty) : 0)}</td>
     </tr>`;
@@ -2205,10 +2209,10 @@ function filterSkuTable(q) {
       <td>${r.product_name || m.product_name || '—'}</td>
       <td style="color:var(--text3);font-size:12px;">${cat}</td>
       <td>${platTag}</td>
-      <td class="right">${r.qty.toLocaleString('en-US')}</td>
-      <td class="right">${fmtMoney(r.rev)}</td>
-      <td class="right">${fmtMoney(r.cogs||0)}</td>
-      <td class="right">${fmtMoney(r.profit)}</td>
+      <td class="right" data-sort="${r.qty}">${r.qty.toLocaleString('en-US')}</td>
+      <td class="right" data-sort="${r.rev}">${fmtMoney(r.rev)}</td>
+      <td class="right" data-sort="${r.cogs||0}">${fmtMoney(r.cogs||0)}</td>
+      <td class="right" data-sort="${r.profit}">${fmtMoney(r.profit)}</td>
       <td class="right"><span class="gm-badge ${r.gm>=30?'gm-high':r.gm>=15?'gm-mid':'gm-low'}">${r.gm.toFixed(1)}%</span></td>
     </tr>`;
   }).join('') || '<tr><td colspan="11" class="empty">Không có dữ liệu</td></tr>';
@@ -2380,7 +2384,7 @@ function renderSalesSkuTable(rows) {
       <td>${r.product_name || m.product_name || '—'}</td>
       <td style="color:var(--text3);font-size:11px;">${cat}</td>
       <td class="right" style="font-weight:500;">${r.qty.toLocaleString('en-US')}</td>
-      <td class="right">${fmtMoney(r.rev)}</td>
+      <td class="right" data-sort="${r.rev}">${fmtMoney(r.rev)}</td>
       <td class="right"><span class="gm-badge ${r.gm>=30?'gm-high':r.gm>=15?'gm-mid':'gm-low'}">${r.gm.toFixed(1)}%</span></td>
     </tr>`;
   }).join('') || '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>';
@@ -2429,7 +2433,7 @@ async function loadCategoryData() {
       <td style="font-weight:500;">${r.medium}</td>
       <td style="color:var(--text3);">${r.large}</td>
       <td class="right" style="font-weight:500;">${r.qty.toLocaleString('en-US')}</td>
-      <td class="right">${fmtMoney(r.rev)}</td>
+      <td class="right" data-sort="${r.rev}">${fmtMoney(r.rev)}</td>
       <td class="right"><span class="gm-badge ${gm>=30?'gm-high':gm>=15?'gm-mid':'gm-low'}">${gm.toFixed(1)}%</span></td>
       <td class="right" style="color:var(--text3);font-size:11px;">${peakLabel}</td>
     </tr>`;
@@ -2477,9 +2481,9 @@ async function loadPlatformData() {
     return `<tr>
       <td><span class="plat-tag tag-${p==='shopee_t2c'?'t2c':p==='shopee_k2c'?'k2c':'tiktok'}">${platMap[p]||p}</span></td>
       <td class="right" style="font-weight:500;">${r.qty.toLocaleString('en-US')}</td>
-      <td class="right">${fmtMoney(r.rev)}</td>
+      <td class="right" data-sort="${r.rev}">${fmtMoney(r.rev)}</td>
       <td class="right"><span class="gm-badge ${gm>=30?'gm-high':gm>=15?'gm-mid':'gm-low'}">${gm.toFixed(1)}%</span></td>
-      <td class="right">${r.orders.size.toLocaleString('en-US')}</td>
+      <td class="right" data-sort="${r.orders.size}">${r.orders.size.toLocaleString('en-US')}</td>
     </tr>`;
   }).join('') || '<tr><td colspan="5" class="empty">Không có dữ liệu</td></tr>';
 
@@ -2805,8 +2809,8 @@ function renderCostByCategory() {
     return `<tr>
       <td style="font-weight:500;">${r.med}</td>
       <td style="color:var(--text3);">${r.lrg}</td>
-      <td class="right">${n.toLocaleString('en-US')}</td>
-      <td class="right">${total.toLocaleString('en-US')}</td>
+      <td class="right" data-sort="${n}">${n.toLocaleString('en-US')}</td>
+      <td class="right" data-sort="${total}">${total.toLocaleString('en-US')}</td>
       <td class="right" style="font-weight:500;">${n>0?fmtNum(Math.round(avg)):'—'}</td>
       <td class="right" style="color:var(--text3);">${n>0?fmtNum(min):'—'}</td>
       <td class="right" style="color:var(--text3);">${n>0?fmtNum(max):'—'}</td>
@@ -3223,8 +3227,8 @@ function _runAuditCore() {
     <td class="mono" style="font-size:11px;">${r.sku}</td>
     <td style="font-size:12px;">${r.name}</td>
     <td><span class="plat-tag tag-${r.platform==='shopee_t2c'?'t2c':r.platform==='shopee_k2c'?'k2c':'tiktok'}">${platMap[r.platform]||r.platform}</span></td>
-    <td class="right">${fmtMoney(r.rev)}</td>
-    <td class="right">${fmtMoney(r.cogs)}</td>
+    <td class="right" data-sort="${r.rev}">${fmtMoney(r.rev)}</td>
+    <td class="right" data-sort="${r.cogs}">${fmtMoney(r.cogs)}</td>
     <td class="right"><span class="gm-badge gm-low">${r.gm.toFixed(1)}%</span></td>
     <td style="color:var(--amber);font-size:12px;">⚠️ ${r.issue}</td>
   </tr>`).join('') || '<tr><td colspan="7" class="empty" style="color:var(--green);">✓ Không có vấn đề</td></tr>';
@@ -3239,8 +3243,8 @@ function _runAuditCore() {
       <td class="mono" style="font-size:11px;">${r.sku}</td>
       <td style="font-size:12px;">${m.product_name||'—'}</td>
       <td><span class="plat-tag tag-${r.platform==='shopee_t2c'?'t2c':r.platform==='shopee_k2c'?'k2c':'tiktok'}">${platMap[r.platform]||r.platform}</span></td>
-      <td class="right">${qty.toLocaleString('en-US')}</td>
-      <td class="right">${fmtMoney(r.rev)}</td>
+      <td class="right" data-sort="${qty}">${qty.toLocaleString('en-US')}</td>
+      <td class="right" data-sort="${r.rev}">${fmtMoney(r.rev)}</td>
       <td class="right" style="color:var(--red);">0</td>
     </tr>`;
   }).join('') || '<tr><td colspan="6" class="empty" style="color:var(--green);">✓ Tất cả SKU đều có giá vốn</td></tr>';
@@ -3261,8 +3265,8 @@ function _runAuditCore() {
   document.getElementById('audit-spike-body').innerHTML = spikes.sort((a,b)=>b.rev-a.rev).map(r => `<tr>
     <td>${r.date}</td>
     <td style="color:var(--text3);">Tất cả</td>
-    <td class="right">${fmtMoney(r.rev)}</td>
-    <td class="right">${fmtMoney(median)}</td>
+    <td class="right" data-sort="${r.rev}">${fmtMoney(r.rev)}</td>
+    <td class="right" data-sort="${median}">${fmtMoney(median)}</td>
     <td class="right" style="color:var(--amber);font-weight:600;">${(r.rev/median).toFixed(1)}x</td>
   </tr>`).join('') || '<tr><td colspan="5" class="empty" style="color:var(--green);">✓ Không có đột biến bất thường</td></tr>';
 
@@ -3295,7 +3299,7 @@ function _runAuditCore() {
     <td><span class="plat-tag tag-${r.platform==='shopee_t2c'?'t2c':r.platform==='shopee_k2c'?'k2c':'tiktok'}">${platMap[r.platform]||r.platform||'—'}</span></td>
     <td>${String(r.order_date||'').slice(0,10)}</td>
     <td class="right" style="color:var(--red);">${fmtMoney(r.revenue)}</td>
-    <td class="right">${fmtMoney(r.cogs)}</td>
+    <td class="right" data-sort="${r.cogs}">${fmtMoney(r.cogs)}</td>
   </tr>`).join('') || '<tr><td colspan="5" class="empty" style="color:var(--green);">✓ Không có doanh thu âm</td></tr>';
 
   // ---- Summary badges — clickable, scroll to anchor ----
