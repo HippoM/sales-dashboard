@@ -1292,7 +1292,7 @@ async function fetchAllOrders(forceRefetch) {
   setLoadingState(true, 'Đang tải dữ liệu...');
   try {
     // Dùng RPC để fetch pre-aggregated data — nhanh hơn raw rows
-    const raw = await sbRpc('get_orders_summary', {});
+    const raw = await sbGet('monthly_snapshots', '?select=order_date,platform,sku,product_name,qty,revenue,cogs,gross_profit,order_count,month_year');
     // Map về format giống raw orders để các hàm filter/render không đổi
     _allOrders = raw.map(r => ({
       order_id:    r.order_date + '|' + r.platform + '|' + r.sku, // synthetic key
@@ -1305,6 +1305,7 @@ async function fetchAllOrders(forceRefetch) {
       qty:         Number(r.qty) || 0,
       order_date:  r.order_date,
       platform:    r.platform,
+      month_year:  r.month_year,
       _order_count: Number(r.order_count) || 0,
     }));
     _allOrdersLoaded = true;
