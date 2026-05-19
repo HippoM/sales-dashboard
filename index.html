@@ -572,9 +572,21 @@
       <div class="nav-tab admin-tab" id="admin-nav" onclick="switchTab('admin')" style="display:none;">Admin</div>
     </nav>
   </div>
-  <div class="topbar-right">
-    <div class="conn-dot" id="conn-dot"></div>
-    <span class="conn-text" id="conn-text">Đang kết nối...</span>
+  <div class="topbar-right" style="flex-direction:column;align-items:flex-end;gap:3px;">
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="conn-dot" id="conn-dot"></div>
+      <span class="conn-text" id="conn-text">Đang kết nối...</span>
+    </div>
+    <div id="load-progress-wrap" style="display:none;width:180px;">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:2px;">
+        <span id="load-progress-text">Đang tải dữ liệu...</span>
+        <span id="load-progress-pct">0%</span>
+      </div>
+      <div style="background:var(--border);border-radius:4px;height:4px;overflow:hidden;">
+        <div id="load-progress-bar" style="height:100%;width:0%;background:var(--green);border-radius:4px;transition:width 0.2s;"></div>
+      </div>
+      <div id="load-eta" style="font-size:10px;color:var(--text3);margin-top:2px;text-align:right;"></div>
+    </div>
   </div>
 </div>
 
@@ -1191,11 +1203,27 @@ let _pendingTimeChange = false;
 function sbHeaders(extra = {}) {
   return { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', ...extra };
 }
-async function sbGet(table, params = '') {
+async function sbGet(table, params = '', onProgress = null) {
   const pageSize = 1000;
   const baseParams = params.replace(/[&?]limit=\d+/g,'').replace(/[&?]offset=\d+/g,'');
   const sep = baseParams.includes('?') ? '&' : '?';
-  let all = [], offset = 0;
+  let all = [], offset = 0, total = null;
+
+  // First request with count to get total rows
+  const firstRes = await fetch(
+    `${SUPABASE_URL}/rest/v1/${table}${baseParams}${sep}limit=${pageSize}&offset=0`,
+    { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'count=exact' } }
+  );
+  if (!firstRes.ok) throw new Error(await firstRes.text());
+  const contentRange = firstRes.headers.get('Content-Range');
+  if (contentRange) { const m = contentRange.match(/\/(\d+)$/); if (m) total = parseInt(m[1]); }
+  const firstData = await firstRes.json();
+  if (!Array.isArray(firstData) || firstData.length === 0) return [];
+  all = firstData;
+  offset = pageSize;
+  if (onProgress && total) onProgress(Math.min(all.length, total), total);
+  if (firstData.length < pageSize) { if (onProgress && total) onProgress(total, total); return all; }
+
   while (true) {
     const res = await fetch(
       `${SUPABASE_URL}/rest/v1/${table}${baseParams}${sep}limit=${pageSize}&offset=${offset}`,
@@ -1205,9 +1233,11 @@ async function sbGet(table, params = '') {
     const data = await res.json();
     if (!Array.isArray(data) || data.length === 0) break;
     all = all.concat(data);
-    if (data.length < pageSize) break;
     offset += pageSize;
+    if (onProgress && total) onProgress(Math.min(all.length, total), total);
+    if (data.length < pageSize) break;
   }
+  if (onProgress && total) onProgress(total, total);
   return all;
 }
 async function sbRpc(fn, params = {}) {
@@ -1290,16 +1320,48 @@ function setLoadingState(on, msg) {
     dot.style.background = '';
     dot.classList.add('ok');
     text.textContent = 'Đã kết nối';
+    hideLoadProgress();
   }
+}
+
+function showLoadProgress(loaded, total, startTime) {
+  const wrap = document.getElementById('load-progress-wrap');
+  const bar  = document.getElementById('load-progress-bar');
+  const pct  = document.getElementById('load-progress-pct');
+  const txt  = document.getElementById('load-progress-text');
+  const eta  = document.getElementById('load-eta');
+  if (!wrap) return;
+  wrap.style.display = 'block';
+  const p = total > 0 ? Math.round(loaded / total * 100) : 0;
+  bar.style.width = p + '%';
+  pct.textContent = p + '%';
+  txt.textContent = loaded.toLocaleString('en-US') + ' / ' + total.toLocaleString('en-US') + ' dòng';
+  if (startTime && loaded > 0 && loaded < total) {
+    const elapsed = (Date.now() - startTime) / 1000;
+    const rate = loaded / elapsed;
+    const remaining = Math.ceil((total - loaded) / rate);
+    eta.textContent = remaining > 0 ? 'Còn khoảng ' + remaining + 's' : '';
+  } else if (loaded >= total) {
+    eta.textContent = '';
+  }
+}
+
+function hideLoadProgress() {
+  const wrap = document.getElementById('load-progress-wrap');
+  if (wrap) wrap.style.display = 'none';
 }
 
 async function fetchAllOrders(forceRefetch) {
   if (_dataLoading) return;
   _dataLoading = true;
   setLoadingState(true, 'Đang tải dữ liệu...');
+  const _loadStart = Date.now();
+  showLoadProgress(0, 1);
   try {
     // Dùng RPC để fetch pre-aggregated data — nhanh hơn raw rows
-    const raw = await sbGet('monthly_snapshots', '?select=order_date,platform,sku,product_name,qty,revenue,cogs,gross_profit,order_count,month_year');
+    const raw = await sbGet('monthly_snapshots', '?select=order_date,platform,sku,product_name,qty,revenue,cogs,gross_profit,order_count,month_year', (loaded, total) => {
+      showLoadProgress(loaded, total, _loadStart);
+    });
     // Map về format giống raw orders để các hàm filter/render không đổi
     _allOrders = raw.map(r => ({
       order_id:    r.order_date + '|' + r.platform + '|' + r.sku, // synthetic key
@@ -2479,8 +2541,8 @@ async function loadCategoryData() {
   }).join('') || '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>';
   makeSortable('tbl-cat-sales');
 
-  // Chart: sort descending rồi reverse để top 1 ở trên cùng
-  const sorted = [...rows].sort((a,b) => b.qty - a.qty).reverse();
+  // Chart: sort ascending để top 1 ở trên cùng (Chart.js horizontal bar renders top-down)
+  const sorted = [...rows].sort((a,b) => a.qty - b.qty);
   _destroyChart('catQtyChart');
   window.catQtyChart = _makeHorizBar('chart-cat-qty',
     sorted.map(r => r.medium), sorted.map(r => r.qty),
