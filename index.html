@@ -1273,6 +1273,9 @@ async function sbDelete(table, filter) {
 // INIT
 // ============================================================
 window.addEventListener('DOMContentLoaded', async () => {
+  // Hiện spinner ngay lập tức
+  showLoadProgress(0, 0);
+
   // Check admin key
   const params = new URLSearchParams(window.location.search);
   if (params.get('key') === ADMIN_KEY) {
@@ -2557,7 +2560,7 @@ async function loadCategoryData() {
   makeSortable('tbl-cat-sales');
 
   // Chart: sort ascending để top 1 hiện ở trên (Chart.js horizontal bar render từ dưới lên)
-  const sorted = [...rows].sort((a,b) => a.qty - b.qty);
+  const sorted = [...rows].sort((a,b) => b.qty - a.qty);
   _destroyChart('catQtyChart');
   window.catQtyChart = _makeHorizBar('chart-cat-qty',
     sorted.map(r => r.medium), sorted.map(r => r.qty),
