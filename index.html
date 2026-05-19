@@ -752,6 +752,7 @@
               <option value="10">10</option>
               <option value="20" selected>20</option>
               <option value="30">30</option>
+              <option value="99999">Tất cả</option>
             </select>
             <span style="font-size:11px;color:var(--text3);">SKU</span>
           </div>
@@ -768,7 +769,10 @@
       <div class="table-card">
         <div class="table-header">
           <div class="table-title">Tổng hợp SL bán theo SKU</div>
-          <div class="search-wrap"><span class="search-wrap-icon">⌕</span><input type="text" placeholder="Tìm SKU..." oninput="filterSalesSkuTable(this.value)"></div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div class="search-wrap"><span class="search-wrap-icon">⌕</span><input type="text" placeholder="Tìm SKU..." oninput="filterSalesSkuTable(this.value)"></div>
+            <button class="btn btn-sm" onclick="exportSalesSkuCSV()">↓ CSV</button>
+          </div>
         </div>
         <div style="overflow-x:auto;">
           <table id="tbl-sales-sku">
@@ -803,7 +807,10 @@
 
       <!-- Bảng -->
       <div class="table-card">
-        <div class="table-header"><div class="table-title">Chi tiết theo Category</div></div>
+        <div class="table-header">
+          <div class="table-title">Chi tiết theo Category</div>
+          <button class="btn btn-sm" onclick="exportCatSalesCSV()">↓ CSV</button>
+        </div>
         <table id="tbl-cat-sales">
           <thead><tr>
             <th class="sortable">#</th><th class="sortable">Medium Category</th><th>Large Category</th>
@@ -1858,6 +1865,38 @@ function exportTableCSV() {
   a.href = url; a.download = filename; a.click();
   URL.revokeObjectURL(url);
   showToast('Đã xuất ' + filename, 'success');
+}
+
+function exportSalesSkuCSV() {
+  const master = {};
+  skuMasterCache.forEach(s => master[s.sku] = s);
+  const platMap = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop' };
+  const headers = ['#','SKU','Tên sản phẩm','Large Category','Medium Category','Sàn','SL bán','Doanh thu','GM%'];
+  const tbody = document.getElementById('sales-sku-body');
+  const rows = [...tbody.querySelectorAll('tr')].filter(r => r.cells.length > 1).map((tr, i) => {
+    const cells = [...tr.cells].map(td => td.getAttribute('data-sort') || td.textContent.trim());
+    return cells;
+  });
+  const csv = [headers.join(','), ...rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'sl_ban_theo_sku.csv'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Đã xuất sl_ban_theo_sku.csv', 'success');
+}
+
+function exportCatSalesCSV() {
+  const headers = ['#','Medium Category','Large Category','SL bán','Doanh thu','GM%','Tháng đỉnh'];
+  const tbody = document.getElementById('cat-table-body');
+  const rows = [...tbody.querySelectorAll('tr')].filter(r => r.cells.length > 1).map(tr => {
+    return [...tr.cells].map(td => `"${td.textContent.trim().replace(/"/g,'""')}"`);
+  });
+  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'sl_ban_theo_category.csv'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Đã xuất sl_ban_theo_category.csv', 'success');
 }
 
 // ============================================================
