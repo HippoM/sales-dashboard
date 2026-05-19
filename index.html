@@ -579,16 +579,7 @@
       <span class="conn-text" id="conn-text">Đang kết nối...</span>
     </div>
     <!-- Progress bar — chỉ hiện khi đang load -->
-    <div id="load-progress-wrap" style="display:none;width:200px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;padding:6px 8px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-        <span id="load-progress-text" style="font-size:10px;color:var(--text3);">Đang tải...</span>
-        <span id="load-progress-pct" style="font-size:10px;font-weight:600;color:var(--green);">0%</span>
-      </div>
-      <div style="background:var(--border);border-radius:4px;height:4px;overflow:hidden;">
-        <div id="load-progress-bar" style="height:100%;width:0%;background:var(--green);border-radius:4px;transition:width 0.3s;"></div>
-      </div>
-      <div id="load-eta" style="font-size:10px;color:var(--text3);margin-top:3px;text-align:right;"></div>
-    </div>
+
   </div>
 </div>
 
@@ -621,6 +612,17 @@
     <button class="plat-btn plat-t2c"           id="plat-t2c"    onclick="setPlatform('t2c')">Shopee T2C</button>
     <button class="plat-btn plat-k2c"           id="plat-k2c"    onclick="setPlatform('k2c')">Shopee K2C</button>
     <button class="plat-btn plat-tiktok"        id="plat-tiktok" onclick="setPlatform('tiktok')">TikTok Shop</button>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="filter-divider"></div>
+  <div id="load-progress-wrap" style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+    <span id="load-progress-text" style="font-size:11px;color:var(--text3);white-space:nowrap;">Đang kết nối...</span>
+    <div style="width:120px;background:var(--border);border-radius:4px;height:5px;overflow:hidden;">
+      <div id="load-progress-bar" style="height:100%;width:30%;background:var(--green);border-radius:4px;transition:width 0.3s;opacity:0.5;animation:pulse-bar 1.2s ease-in-out infinite;"></div>
+    </div>
+    <span id="load-progress-pct" style="font-size:11px;font-weight:600;color:var(--green);min-width:30px;">...</span>
+    <span id="load-eta" style="font-size:11px;color:var(--text3);white-space:nowrap;"></span>
   </div>
 </div>
 
