@@ -1349,8 +1349,18 @@ function showLoadProgress(loaded, total, startTime) {
 }
 
 function hideLoadProgress() {
+  // Không ẩn — cập nhật thành trạng thái done
   const wrap = document.getElementById('load-progress-wrap');
-  if (wrap) wrap.style.display = 'none';
+  const bar  = document.getElementById('load-progress-bar');
+  const pct  = document.getElementById('load-progress-pct');
+  const txt  = document.getElementById('load-progress-text');
+  const eta  = document.getElementById('load-eta');
+  if (!wrap) return;
+  wrap.style.display = 'block';
+  if (bar) { bar.style.width = '100%'; bar.style.animation = ''; bar.style.opacity = '1'; }
+  if (pct) pct.textContent = '100%';
+  if (txt) txt.textContent = 'Đã tải xong';
+  if (eta) eta.textContent = '';
 }
 
 async function fetchAllOrders(forceRefetch) {
