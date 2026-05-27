@@ -1949,14 +1949,52 @@ function exportTableCSV() {
 function exportSalesSkuCSV() {
   const master = {};
   skuMasterCache.forEach(s => master[s.sku] = s);
-  const headers = ['#','SKU','Tên sản phẩm','Large Category','Medium Category','SL bán','Doanh thu','GM%'];
-  const rows = (salesSkuAll || []).map(r => {
-    const m = master[r.sku] || {};
+
+  const orders = getFilteredOrders();
+
+  // Period length & header label follows current gran
+  const periodLen   = gran === 'year' ? 4 : gran === 'day' ? 10 : 7;
+  const periodLabel = gran === 'year' ? 'Year' : gran === 'day' ? 'Date' : 'Month';
+
+  // Collect all periods
+  const periodSet = new Set();
+  orders.forEach(r => {
+    const d = String(r.order_date || '');
+    if (d.length >= periodLen) periodSet.add(d.slice(0, periodLen));
+  });
+  const periods = [...periodSet].sort();
+
+  // Group by SKU + period
+  const bySkuPeriod = {};
+  orders.forEach(r => {
+    const d = String(r.order_date || '');
+    const period = d.slice(0, periodLen);
+    const key = r.sku + '||' + period;
+    if (!bySkuPeriod[key]) bySkuPeriod[key] = { sku: r.sku, product_name: r.product_name, period, qty: 0, rev: 0, profit: 0 };
+    bySkuPeriod[key].qty    += Number(r.qty) || 0;
+    bySkuPeriod[key].rev    += Number(r.revenue) || 0;
+    bySkuPeriod[key].profit += Number(r.gross_profit) || 0;
+  });
+
+  // SKU order = same as table (sorted by total qty desc)
+  const skuOrder = (salesSkuAll || []).map(r => r.sku);
+
+  const headers = [periodLabel, '#', 'SKU', 'Tên sản phẩm', 'Large Category', 'Medium Category', 'SL bán', 'Doanh thu', 'GM%'];
+  const rows = [];
+  skuOrder.forEach((sku, idx) => {
+    const m = master[sku] || {};
     const lc = m.large_category || '';
     const mc = m.medium_category || '';
-    const gm = r.gm !== undefined ? r.gm.toFixed(1) + '%' : '';
-    return [r.rank, r.sku, r.product_name || m.product_name || '', lc, mc, r.qty, r.rev, gm];
+    const productName = m.product_name || sku;
+    periods.forEach(period => {
+      const key = sku + '||' + period;
+      const d = bySkuPeriod[key];
+      if (!d) return; // no sales this period → skip row
+      const gm = d.rev > 0 ? (d.profit / d.rev * 100).toFixed(1) + '%' : '0%';
+      rows.push([period, idx + 1, sku, d.product_name || productName, lc, mc, d.qty, Math.round(d.rev), gm]);
+    });
   });
+
   const csv = [headers.join(','), ...rows.map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(','))].join('\n');
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
