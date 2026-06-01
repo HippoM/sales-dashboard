@@ -1979,19 +1979,30 @@ function exportSalesSkuCSV() {
   // SKU order = same as table (sorted by total qty desc)
   const skuOrder = (salesSkuAll || []).map(r => r.sku);
 
-  const headers = [periodLabel, '#', 'SKU', 'Tên sản phẩm', 'Large Category', 'Medium Category', 'SL bán', 'Doanh thu', 'GM%'];
+  // Per-SKU totals: avg = total qty / số tháng SKU thực sự có đơn
+  const skuTotals = {};
+  Object.values(bySkuPeriod).forEach(d => {
+    if (!skuTotals[d.sku]) skuTotals[d.sku] = { totalQty: 0, monthsWithSales: 0 };
+    skuTotals[d.sku].totalQty       += d.qty;
+    skuTotals[d.sku].monthsWithSales += 1;
+  });
+
+  const headers = [periodLabel, '#', 'SKU', 'Tên sản phẩm', 'Large Category', 'Medium Category', 'SL bán', 'Doanh thu', 'GM%', 'Avg SL/Tháng có bán'];
   const rows = [];
   skuOrder.forEach((sku, idx) => {
     const m = master[sku] || {};
     const lc = m.large_category || '';
     const mc = m.medium_category || '';
     const productName = m.product_name || sku;
+    const st = skuTotals[sku] || { totalQty: 0, monthsWithSales: 1 };
+    // Avg = tổng SL / số tháng SKU có đơn thực tế
+    const avg = st.monthsWithSales > 0 ? (st.totalQty / st.monthsWithSales).toFixed(1) : '0';
     periods.forEach(period => {
       const key = sku + '||' + period;
       const d = bySkuPeriod[key];
       if (!d) return; // no sales this period → skip row
       const gm = d.rev > 0 ? (d.profit / d.rev * 100).toFixed(1) + '%' : '0%';
-      rows.push([period, idx + 1, sku, d.product_name || productName, lc, mc, d.qty, Math.round(d.rev), gm]);
+      rows.push([period, idx + 1, sku, d.product_name || productName, lc, mc, d.qty, Math.round(d.rev), gm, avg]);
     });
   });
 
