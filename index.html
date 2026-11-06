@@ -106,6 +106,10 @@
   .filter-bar.plat-t2c    { border-bottom-color: var(--green); }
   .filter-bar.plat-k2c    { border-bottom-color: #185FA5; }
   .filter-bar.plat-tiktok { border-bottom-color: #7a2844; }
+  .filter-bar.plat-tokyshopee { border-bottom-color: #7a4a0a; }
+  .filter-bar.plat-tokytiktok { border-bottom-color: #8a1a1a; }
+  .filter-bar.plat-elmichshopee { border-bottom-color: #0f5a50; }
+  .filter-bar.plat-elmichtiktok { border-bottom-color: #1f2a7a; }
   .filter-divider { width: 0.5px; height: 20px; background: var(--border); }
 
   .seg {
@@ -169,6 +173,23 @@
   /* TikTok — tim */
   .plat-btn.plat-tiktok { background: #d4bcf8; color: #4a1a8a; border-color: #a07ae4; transition: all 0.15s; }
   .plat-btn.plat-tiktok.is-active { background: #b89cf0; border-color: #4a1a8a; font-weight:600; box-shadow: 0 0 0 2px #4a1a8a30; }
+
+
+  /* Toky Shopee — cam */
+  .plat-btn.plat-tokyshopee { background: #fcd9a8; color: #7a4a0a; border-color: #e8a860; transition: all 0.15s; }
+  .plat-btn.plat-tokyshopee.is-active { background: #f0bc78; border-color: #7a4a0a; font-weight:600; box-shadow: 0 0 0 2px #7a4a0a30; }
+
+  /* Toky TikTok — hong */
+  .plat-btn.plat-tokytiktok { background: #f8c4c4; color: #8a1a1a; border-color: #e48a8a; transition: all 0.15s; }
+  .plat-btn.plat-tokytiktok.is-active { background: #f0a0a0; border-color: #8a1a1a; font-weight:600; box-shadow: 0 0 0 2px #8a1a1a30; }
+
+  /* Elmich Shopee — xanh ngoc */
+  .plat-btn.plat-elmichshopee { background: #b8e8e0; color: #0f5a50; border-color: #70c8b8; transition: all 0.15s; }
+  .plat-btn.plat-elmichshopee.is-active { background: #90d8c8; border-color: #0f5a50; font-weight:600; box-shadow: 0 0 0 2px #0f5a5030; }
+
+  /* Elmich TikTok — xanh tim than */
+  .plat-btn.plat-elmichtiktok { background: #c4cdf5; color: #1f2a7a; border-color: #8a98e0; transition: all 0.15s; }
+  .plat-btn.plat-elmichtiktok.is-active { background: #a4b0ee; border-color: #1f2a7a; font-weight:600; box-shadow: 0 0 0 2px #1f2a7a30; }
 
   /* ===================== CONTENT ===================== */
   .content { max-width: 100%; margin: 0; padding: 24px 32px; }
@@ -389,6 +410,10 @@
   .tag-t2c    { background: var(--green-bg); color: var(--green); }
   .tag-k2c    { background: #e6f1fb; color: #185FA5; }
   .tag-tiktok { background: #ede8fb; color: #4a1a8a; }
+  .tag-tokyshopee { background: #fcd9a8; color: #7a4a0a; }
+  .tag-tokytiktok { background: #f8c4c4; color: #8a1a1a; }
+  .tag-elmichshopee { background: #b8e8e0; color: #0f5a50; }
+  .tag-elmichtiktok { background: #c4cdf5; color: #1f2a7a; }
   .tag-new { background: var(--bg2); color: var(--text2); border: 0.5px solid var(--border2); }
   .tag-unmatched { background: var(--amber-bg); color: var(--amber); }
   .tag-matched { background: var(--green-bg); color: var(--green); }
@@ -607,6 +632,10 @@
     <button class="plat-btn plat-t2c"           id="plat-t2c"    onclick="setPlatform('t2c')">Shopee T2C</button>
     <button class="plat-btn plat-k2c"           id="plat-k2c"    onclick="setPlatform('k2c')">Shopee K2C</button>
     <button class="plat-btn plat-tiktok"        id="plat-tiktok" onclick="setPlatform('tiktok')">TikTok Shop</button>
+    <button class="plat-btn plat-tokyshopee" id="plat-tokyshopee" onclick="setPlatform('tokyshopee')">Toky Shopee</button>
+    <button class="plat-btn plat-tokytiktok" id="plat-tokytiktok" onclick="setPlatform('tokytiktok')">Toky TikTok</button>
+    <button class="plat-btn plat-elmichshopee" id="plat-elmichshopee" onclick="setPlatform('elmichshopee')">Elmich Shopee</button>
+    <button class="plat-btn plat-elmichtiktok" id="plat-elmichtiktok" onclick="setPlatform('elmichtiktok')">Elmich TikTok</button>
   </div>
 
   <!-- Progress bar -->
@@ -1165,6 +1194,25 @@
 // ============================================================
 // CONFIG
 // ============================================================
+// ============================================================
+// DANH SACH NEN TANG (them nen tang moi chi can them 1 dong o day + 1 nut o filter bar + 1 mau CSS)
+// ============================================================
+const PLATFORMS = [
+  { id: 't2c',          key: 'shopee_t2c',    label: 'Shopee T2C',    color: '#3B6D11' },
+  { id: 'k2c',          key: 'shopee_k2c',    label: 'Shopee K2C',    color: '#639922' },
+  { id: 'tiktok',       key: 'tiktok',        label: 'TikTok Shop',   color: '#c0dd97' },
+  { id: 'tokyshopee',   key: 'shopee_toky',   label: 'Toky Shopee',   color: '#e8a860' },
+  { id: 'tokytiktok',   key: 'tiktok_toky',   label: 'Toky TikTok',   color: '#e48a8a' },
+  { id: 'elmichshopee', key: 'shopee_elmich', label: 'Elmich Shopee', color: '#70c8b8' },
+  { id: 'elmichtiktok', key: 'tiktok_elmich', label: 'Elmich TikTok', color: '#8a98e0' }
+];
+const PLAT_IDS = PLATFORMS.map(function (x) { return x.id; });
+const PLAT_ID2KEY = {}, PLAT_KEY2ID = {}, PLAT_LABEL = {}, PLAT_COLOR = {};
+PLATFORMS.forEach(function (x) {
+  PLAT_ID2KEY[x.id] = x.key; PLAT_KEY2ID[x.key] = x.id;
+  PLAT_LABEL[x.key] = x.label; PLAT_COLOR[x.key] = x.color;
+});
+
 const SUPABASE_URL = 'https://xajnsnlovynvbtcrnjoa.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhham5zbmxvdnludmJ0Y3Juam9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5MDk0MDAsImV4cCI6MjEwMTQ4NTQwMH0.62i2SWYTAEhBXUqsYhjauIhK8P1YqiICSNCTxD6daXE';
 const ADMIN_KEY    = 't5bzDXtgkbFcF41F8MKHkg';
@@ -1536,7 +1584,7 @@ document.addEventListener('keydown', e => {
 
 function setPlatform(p) {
   platform = p;
-  ['all','t2c','k2c','tiktok'].forEach(id => {
+  ['all'].concat(PLAT_IDS).forEach(id => {
     const btn = document.getElementById(`plat-${id}`);
     btn.className = `plat-btn plat-${id}` + (id === p ? ' is-active' : '');
   });
@@ -1564,7 +1612,7 @@ function getDateFilter() {
 // Pastel color ramps: [rank1=dam, rank2=trung, rank3=nhat]
 function getPlatformFilter() {
   if (platform === 'all') return '';
-  const map = { t2c: 'shopee_t2c', k2c: 'shopee_k2c', tiktok: 'tiktok' };
+  const map = PLAT_ID2KEY;
   return `&platform=eq.${map[platform]}`;
 }
 
@@ -1575,7 +1623,7 @@ function getPlatformFilter() {
 // Filter _allOrders theo date range và platform hiện tại
 function getFilteredOrders() {
   if (!_allOrders) return [];
-  const platMap = { t2c: 'shopee_t2c', k2c: 'shopee_k2c', tiktok: 'tiktok' };
+  const platMap = PLAT_ID2KEY;
   const platVal = platMap[platform] || null;
 
   let fromStr, toStr;
@@ -1646,7 +1694,7 @@ function groupOrdersByPeriod(orders, g) {
 function buildSkuTableFromOrders(orders) {
   const master = {};
   skuMasterCache.forEach(s => master[s.sku] = s);
-  const platMap = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop' };
+  const platMap = PLAT_LABEL;
   const bySkuPlat = {};
   orders.forEach(r => {
     const key = (r.sku||'') + '|' + (r.platform||'');
@@ -1666,7 +1714,7 @@ function buildSkuTableFromOrders(orders) {
     const mc  = m.medium_category;
     const cat = [lc, mc].filter(Boolean).join(' › ') || '—';
     const platTag = r.platform
-      ? `<span class="plat-tag tag-${r.platform==='shopee_t2c'?'t2c':r.platform==='shopee_k2c'?'k2c':'tiktok'}">${platMap[r.platform]||r.platform}</span>`
+      ? `<span class="plat-tag tag-${(PLAT_KEY2ID[r.platform]||'tiktok')}">${platMap[r.platform]||r.platform}</span>`
       : '<span style="color:var(--text3);">—</span>';
     const aov = r.qty > 0 ? Math.round(r.rev / r.qty) : 0;
     return `<tr>
@@ -1750,7 +1798,7 @@ function renderFromCache() {
   // Delta — so kỳ trước liền kề (filter trên client, 0 network)
   const { fromStr, toStr } = getCurrentDateRange();
   const prev = getPrevDateRange(fromStr, toStr);
-  const platMap2 = { t2c: 'shopee_t2c', k2c: 'shopee_k2c', tiktok: 'tiktok' };
+  const platMap2 = PLAT_ID2KEY;
   const platVal  = platMap2[platform] || null;
   const prevOrders = (_allOrders || []).filter(r => {
     if (!r.order_date) return false;
@@ -1792,8 +1840,8 @@ function loadOverview() { renderFromCache(); }
 
 // ---- Table: Time detail (subtab Overview) ----
 function buildTimeTable(orders) {
-  const platMap = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop', all: 'Tất cả' };
-  const platVal = platform === 'all' ? null : { t2c:'shopee_t2c', k2c:'shopee_k2c', tiktok:'tiktok' }[platform];
+  const platMap = Object.assign({}, PLAT_LABEL, { all: 'Tất cả' });
+  const platVal = platform === 'all' ? null : PLAT_ID2KEY[platform];
   const map = {};
   orders.forEach(r => {
     const d = String(r.order_date||'');
@@ -1806,7 +1854,7 @@ function buildTimeTable(orders) {
     map[p].orders += r._order_count !== undefined ? (Number(r._order_count)||0) : 1;
   });
   const rows = Object.values(map).sort((a,b) => b.period.localeCompare(a.period));
-  const platLabel = platVal ? platMap[{ shopee_t2c:'t2c', shopee_k2c:'k2c', tiktok:'tiktok' }[platVal]] || platVal : 'Tất cả';
+  const platLabel = platVal ? platMap[PLAT_KEY2ID[platVal]] || platVal : 'Tất cả';
   document.getElementById('time-table-body').innerHTML = rows.map(r => {
     const gm = r.rev > 0 ? r.profit/r.rev*100 : 0;
     const aov = r.orders > 0 ? Math.round(r.rev / r.orders) : 0;
@@ -1834,8 +1882,8 @@ function filterCatTable(q) {
   ));
 }
 function renderCatOverviewTable(rows) {
-  const platMap = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop' };
-  const platVal = platform === 'all' ? null : { t2c:'shopee_t2c', k2c:'shopee_k2c', tiktok:'tiktok' }[platform];
+  const platMap = PLAT_LABEL;
+  const platVal = platform === 'all' ? null : PLAT_ID2KEY[platform];
   document.getElementById('cat-overview-body').innerHTML = rows.map((r,i) => {
     const gm = r.rev > 0 ? r.profit/r.rev*100 : 0;
     const aov = r.qty > 0 ? Math.round(r.rev / r.qty) : 0;
@@ -1894,7 +1942,7 @@ function exportTableCSV() {
   let rows, filename, headers;
   const master = {};
   skuMasterCache.forEach(s => master[s.sku] = s);
-  const platMap = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop' };
+  const platMap = PLAT_LABEL;
 
   if (chartView === 'summary') {
     // Time table
@@ -1913,7 +1961,7 @@ function exportTableCSV() {
     });
     rows = Object.values(map).sort((a,b)=>a.period.localeCompare(b.period)).map(r => {
       const gm = r.rev > 0 ? (r.profit/r.rev*100).toFixed(2)+'%' : '0%';
-      return [r.period, platform==='all'?'Tất cả':platMap[{t2c:'shopee_t2c',k2c:'shopee_k2c',tiktok:'tiktok'}[platform]]||platform, r.rev, r.cogs, r.profit, gm, r.ords, r.ords>0?Math.round(r.rev/r.ords):0];
+      return [r.period, platform==='all'?'Tất cả':platMap[PLAT_ID2KEY[platform]]||platform, r.rev, r.cogs, r.profit, gm, r.ords, r.ords>0?Math.round(r.rev/r.ords):0];
     });
     filename = 'overview_theo_thoi_gian.csv';
 
@@ -1929,7 +1977,7 @@ function exportTableCSV() {
 
   } else {
     headers = ['#','Medium Category','Large Category','Sàn','SL bán','Doanh thu','Giá vốn','Lợi nhuận','GM%'];
-    const platLabel = platform==='all'?'Tất cả':platMap[{t2c:'shopee_t2c',k2c:'shopee_k2c',tiktok:'tiktok'}[platform]]||platform;
+    const platLabel = platform==='all'?'Tất cả':platMap[PLAT_ID2KEY[platform]]||platform;
     rows = _catTableAll.map((r,i) => {
       const gm = r.rev > 0 ? (r.profit/r.rev*100).toFixed(2)+'%' : '0%';
       return [i+1, `"${r.med}"`, `"${r.lrg}"`, platLabel, r.qty, r.rev, r.cogs||0, r.profit, gm];
@@ -2288,7 +2336,7 @@ function renderPlatformBars(orders, idT2c, idK2c, idTiktok) {
 function renderSkuTableFromRpc(rows) {
   const master = {};
   skuMasterCache.forEach(s => master[s.sku] = s);
-  const platMap = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop' };
+  const platMap = PLAT_LABEL;
 
   skuTableAll = rows.map((r, i) => ({
     rank: i + 1,
@@ -2309,7 +2357,7 @@ function renderSkuTableFromRpc(rows) {
     const mc = r.medium_category || m.medium_category;
     const cat = [lc, mc].filter(Boolean).join(' › ') || '—';
     const platTag = r.platform
-      ? `<span class="plat-tag tag-${r.platform==='shopee_t2c'?'t2c':r.platform==='shopee_k2c'?'k2c':'tiktok'}">${platMap[r.platform]||r.platform}</span>`
+      ? `<span class="plat-tag tag-${(PLAT_KEY2ID[r.platform]||'tiktok')}">${platMap[r.platform]||r.platform}</span>`
       : '<span style="color:var(--text3);">—</span>';
     return `<tr>
       <td style="color:var(--text3);">${r.rank}</td>
@@ -2332,7 +2380,7 @@ function renderSkuTableFromRpc(rows) {
 function renderSkuTable(rows) {
   const master = {};
   skuMasterCache.forEach(s => master[s.sku] = s);
-  const platMap = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop' };
+  const platMap = PLAT_LABEL;
 
   document.getElementById('sku-table-body').innerHTML = rows.map(r => {
     const m = master[r.sku] || {};
@@ -2344,7 +2392,7 @@ function renderSkuTable(rows) {
       <td class="mono" style="font-size:11px;">${r.sku}</td>
       <td>${r.product_name || m.product_name || '—'}</td>
       <td style="color:var(--text3);font-size:12px;">${cat}</td>
-      <td>${r.platform ? `<span class="plat-tag tag-${r.platform === 'shopee_t2c' ? 't2c' : r.platform === 'shopee_k2c' ? 'k2c' : 'tiktok'}">${platMap[r.platform]||r.platform}</span>` : '<span style="color:var(--text3);font-size:11px;">—</span>'}</td>
+      <td>${r.platform ? `<span class="plat-tag tag-${(PLAT_KEY2ID[r.platform]||'tiktok')}">${platMap[r.platform]||r.platform}</span>` : '<span style="color:var(--text3);font-size:11px;">—</span>'}</td>
       <td class="right" data-sort="${r.qty}">${r.qty.toLocaleString('en-US')}</td>
       <td class="right" data-sort="${r.rev}">${fmtMoney(r.rev)}</td>
       <td class="right" data-sort="${r.cogs||0}">${fmtMoney(r.cogs||0)}</td>
@@ -2364,12 +2412,12 @@ function filterSkuTable(q) {
   const filtered = [...exact, ...prefix, ...contain];
   const master = {};
   skuMasterCache.forEach(s => master[s.sku] = s);
-  const platMap = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop' };
+  const platMap = PLAT_LABEL;
   document.getElementById('sku-table-body').innerHTML = filtered.map(r => {
     const m   = master[r.sku] || {};
     const cat = [m.large_category, m.medium_category].filter(Boolean).join(' › ') || '—';
     const platTag = r.platform
-      ? `<span class="plat-tag tag-${r.platform==='shopee_t2c'?'t2c':r.platform==='shopee_k2c'?'k2c':'tiktok'}">${platMap[r.platform]||r.platform}</span>`
+      ? `<span class="plat-tag tag-${(PLAT_KEY2ID[r.platform]||'tiktok')}">${platMap[r.platform]||r.platform}</span>`
       : '<span style="color:var(--text3);">—</span>';
     return `<tr>
       <td style="color:var(--text3);">${r.rank}</td>
@@ -2620,8 +2668,8 @@ async function loadCategoryData() {
 async function loadPlatformData() {
   if (!_allOrdersLoaded) return;
   const orders = getFilteredOrders();
-  const platMap    = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop' };
-  const platColors = { shopee_t2c: '#3B6D11', shopee_k2c: '#639922', tiktok: '#c0dd97' };
+  const platMap    = PLAT_LABEL;
+  const platColors = PLAT_COLOR;
 
   const byPlat = {};
   const periodSet = new Set();
@@ -2647,7 +2695,7 @@ async function loadPlatformData() {
     const r = byPlat[p];
     const gm = r.rev > 0 ? r.profit/r.rev*100 : 0;
     return `<tr>
-      <td><span class="plat-tag tag-${p==='shopee_t2c'?'t2c':p==='shopee_k2c'?'k2c':'tiktok'}">${platMap[p]||p}</span></td>
+      <td><span class="plat-tag tag-${(PLAT_KEY2ID[p]||'tiktok')}">${platMap[p]||p}</span></td>
       <td class="right" style="font-weight:500;">${r.qty.toLocaleString('en-US')}</td>
       <td class="right" data-sort="${r.rev}">${fmtMoney(r.rev)}</td>
       <td class="right"><span class="gm-badge ${gm>=30?'gm-high':gm>=15?'gm-mid':'gm-low'}">${gm.toFixed(1)}%</span></td>
@@ -3217,6 +3265,7 @@ async function loadConfigs() {
 }
 
 function tagClass(p) {
+  if (PLAT_KEY2ID[p]) return 'tag-' + PLAT_KEY2ID[p];
   if (p.includes('t2c')) return 'tag-t2c';
   if (p.includes('k2c')) return 'tag-k2c';
   if (p.includes('tiktok')) return 'tag-tiktok';
@@ -3369,7 +3418,7 @@ function _runAuditCore() {
   const orders = _allOrders;
   const master = {};
   skuMasterCache.forEach(s => master[s.sku] = s);
-  const platMap = { shopee_t2c: 'Shopee T2C', shopee_k2c: 'Shopee K2C', tiktok: 'TikTok Shop' };
+  const platMap = PLAT_LABEL;
 
   // ---- Check 1: GM% bất thường ----
   const gmIssues = [];
@@ -3394,7 +3443,7 @@ function _runAuditCore() {
   document.getElementById('audit-gm-body').innerHTML = gmIssues.sort((a,b)=>a.gm-b.gm).map(r => `<tr>
     <td class="mono" style="font-size:11px;">${r.sku}</td>
     <td style="font-size:12px;">${r.name}</td>
-    <td><span class="plat-tag tag-${r.platform==='shopee_t2c'?'t2c':r.platform==='shopee_k2c'?'k2c':'tiktok'}">${platMap[r.platform]||r.platform}</span></td>
+    <td><span class="plat-tag tag-${(PLAT_KEY2ID[r.platform]||'tiktok')}">${platMap[r.platform]||r.platform}</span></td>
     <td class="right" data-sort="${r.rev}">${fmtMoney(r.rev)}</td>
     <td class="right" data-sort="${r.cogs}">${fmtMoney(r.cogs)}</td>
     <td class="right"><span class="gm-badge gm-low">${r.gm.toFixed(1)}%</span></td>
@@ -3410,7 +3459,7 @@ function _runAuditCore() {
     return `<tr>
       <td class="mono" style="font-size:11px;">${r.sku}</td>
       <td style="font-size:12px;">${m.product_name||'—'}</td>
-      <td><span class="plat-tag tag-${r.platform==='shopee_t2c'?'t2c':r.platform==='shopee_k2c'?'k2c':'tiktok'}">${platMap[r.platform]||r.platform}</span></td>
+      <td><span class="plat-tag tag-${(PLAT_KEY2ID[r.platform]||'tiktok')}">${platMap[r.platform]||r.platform}</span></td>
       <td class="right" data-sort="${qty}">${qty.toLocaleString('en-US')}</td>
       <td class="right" data-sort="${r.rev}">${fmtMoney(r.rev)}</td>
       <td class="right" style="color:var(--red);">0</td>
@@ -3464,7 +3513,7 @@ function _runAuditCore() {
   document.getElementById('audit-neg-count').textContent = `${negRevs.length} dòng`;
   document.getElementById('audit-neg-body').innerHTML = negRevs.slice(0,50).map(r => `<tr>
     <td class="mono" style="font-size:11px;">${r.sku||'—'}</td>
-    <td><span class="plat-tag tag-${r.platform==='shopee_t2c'?'t2c':r.platform==='shopee_k2c'?'k2c':'tiktok'}">${platMap[r.platform]||r.platform||'—'}</span></td>
+    <td><span class="plat-tag tag-${(PLAT_KEY2ID[r.platform]||'tiktok')}">${platMap[r.platform]||r.platform||'—'}</span></td>
     <td>${String(r.order_date||'').slice(0,10)}</td>
     <td class="right" style="color:var(--red);">${fmtMoney(r.revenue)}</td>
     <td class="right" data-sort="${r.cogs}">${fmtMoney(r.cogs)}</td>
